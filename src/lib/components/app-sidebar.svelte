@@ -1,3 +1,4 @@
+<!-- src/lib/components/app-sidebar.svelte -->
 <script lang="ts">
   import * as Sidebar from "$lib/components/ui/sidebar";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
@@ -12,7 +13,6 @@
     History as HistoryIcon,
     Heart,
     Users,
-    PackageSearch,
     Stethoscope,
     BarChart3,
     CheckSquare,
@@ -21,9 +21,7 @@
     LogOut,
     Shield
   } from "lucide-svelte";
-  import { query } from "$app/server";
 
-  // Define navigation configuration for each role
   const menuConfig = {
     customer: {
       label: "Customer Portal",
@@ -35,7 +33,7 @@
         { title: "AI Assistant", url: "/ai-assistant", icon: Brain },
         { title: "Order History", url: "/history", icon: HistoryIcon },
         { title: "Favorites", url: "/favorites", icon: Heart },
-        { title : "Complaint", url : "/complaint",icon : Shield}
+        { title: "Complaint", url: "/complaint", icon: Shield }
       ]
     },
     pharmacist: {
@@ -47,7 +45,7 @@
         { title: "Delivery Management", url: "/pharmacist/delivery", icon: Users },
         { title: "Transaction Records", url: "/pharmacist/transaction_records", icon: Users },
         { title: "AI Assistant", url: "/ai-assistant", icon: Brain },
-        { title : "Complaint", url : "/complaint",icon : Shield}
+        { title: "Complaint", url: "/complaint", icon: Shield }
       ]
     },
     admin: {
@@ -64,13 +62,11 @@
     }
   };
 
-  // Derive menu items based on the active session role
   const currentMenu = $derived(menuConfig[userSession.role]);
 </script>
 
-<Sidebar.Root>
+<Sidebar.Root collapsible="icon">
   <Sidebar.Header class="p-4 border-b space-y-4">
-    <!-- Branding Header -->
     <div class="flex items-center gap-3">
       <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black text-lg">
         M
@@ -81,7 +77,6 @@
       </div>
     </div>
 
-    <!-- Role Switcher Dropdown (Session Attribute controller) -->
     <DropdownMenu.Root>
       <DropdownMenu.Trigger class="w-full flex items-center justify-between px-3 py-2 rounded-md border text-xs font-semibold bg-muted/50 hover:bg-muted transition-colors">
         <div class="flex items-center gap-2">
@@ -93,15 +88,9 @@
       <DropdownMenu.Content class="w-[200px]">
         <DropdownMenu.Label class="text-xs text-muted-foreground">Switch Session Role</DropdownMenu.Label>
         <DropdownMenu.Separator />
-        <DropdownMenu.Item onclick={() => userSession.setRole('customer')} class="text-xs">
-          Customer Portal
-        </DropdownMenu.Item>
-        <DropdownMenu.Item onclick={() => userSession.setRole('pharmacist')} class="text-xs">
-          Pharmacist Queue
-        </DropdownMenu.Item>
-        <DropdownMenu.Item onclick={() => userSession.setRole('admin')} class="text-xs">
-          Admin Console
-        </DropdownMenu.Item>
+        <DropdownMenu.Item onclick={() => userSession.setRole('customer')} class="text-xs">Customer Portal</DropdownMenu.Item>
+        <DropdownMenu.Item onclick={() => userSession.setRole('pharmacist')} class="text-xs">Pharmacist Queue</DropdownMenu.Item>
+        <DropdownMenu.Item onclick={() => userSession.setRole('admin')} class="text-xs">Admin Console</DropdownMenu.Item>
       </DropdownMenu.Content>
     </DropdownMenu.Root>
   </Sidebar.Header>
@@ -114,7 +103,7 @@
           {#each currentMenu.items as item (item.title)}
             <Sidebar.MenuItem>
               <Sidebar.MenuButton>
-                {#snippet child({ props }: { props: Record<string, any> })}
+                {#snippet child({ props })}
                   <a href={item.url} {...props}>
                     <item.icon class="w-4 h-4 mr-2" />
                     <span>{item.title}</span>
@@ -132,7 +121,7 @@
     <ThemeToggle />
     <Sidebar.MenuItem class="list-none">
       <Sidebar.MenuButton class="w-fit hover:bg-destructive/10">
-        {#snippet child({ props }: { props: Record<string, any> })}
+        {#snippet child({ props })}
           <a href="/login" {...props} class="flex items-center text-destructive font-semibold">
             <LogOut class="w-4 h-4 mr-2" />
             <span>Logout</span>

@@ -36,75 +36,404 @@
 }
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
+  /* ========================================================
+     THEME 1: DEFAULT / VIBRANT ORANGE (Alt + 1)
+     ======================================================== */
+  :root, [data-theme="theme-1"] {
+    --background: 0 0% 100%;       /* Pure White */
     --foreground: 0 0% 9%;
-
     --card: 0 0% 100%;
     --card-foreground: 0 0% 9%;
-
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 9%;
-
-    --primary: 24.6 95% 53.1%;
+    --primary: 24 98% 56%;
     --primary-foreground: 0 0% 98%;
-
-    --secondary: 0 0% 96.1%;
+    --secondary: 210 25% 95%;
     --secondary-foreground: 0 0% 9%;
-
-    --muted: 0 0% 96.1%;
+    --muted: 210 20% 95%;
     --muted-foreground: 0 0% 45.1%;
-
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-
+    --accent: 190 85% 95%;
+    --accent-foreground: 190 80% 20%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-
-    --radius: 0.5rem;
+    --ring: 24 98% 56%;
+    --radius: 0.3rem;
   }
-
-  .dark {
-    --background: 0 0% 0%;          /* Pure Black Background */
-    --foreground: 0 0% 98%;         /* Clean white text */
-
-    --card: 0 0% 3%;                /* Sleek slightly off-black card background */
+  /* Theme 1 Dark Mode Variant */
+  .dark, [data-theme="theme-1"].dark, &:is(.dark [data-theme="theme-1"] *) {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3%;
     --card-foreground: 0 0% 98%;
-
     --popover: 0 0% 0%;
     --popover-foreground: 0 0% 98%;
-
-    --primary: 24.6 95% 53.1%;      /* Orange primary elements */
-    --primary-foreground: 0 0% 98%; /* White text on primary */
-
-    --secondary: 0 0% 9%;           /* Dark gray secondary accent */
+    --primary: 24 98% 58%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 220 8% 14%;
     --secondary-foreground: 0 0% 98%;
-
-    --muted: 0 0% 9%;
-    --muted-foreground: 24.6 95% 85%; /* Light orange muted text */
-
-    --accent: 24.6 95% 53.1%;
+    --muted: 220 8% 14%;
+    --muted-foreground: 220 10% 72%;
+    --accent: 190 70% 35%;
     --accent-foreground: 0 0% 98%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 12%;             /* Subtle border line */
+    --border: 0 0% 12%;
     --input: 0 0% 12%;
-    --ring: 0 0% 83.1%;
+    --ring: 24 98% 58%;
+  }
+
+  /* ========================================================
+     THEME 2: BLACK & GOLD ELEGANCE (Alt + 2)
+     ======================================================== */
+  [data-theme="theme-2"] {
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 220 40% 6%;
+    --card: 220 25% 97%;
+    --card-foreground: 220 40% 6%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 6%;
+    --primary: 43 80% 56%;         /* Regal Gold */
+    --primary-foreground: 220 40% 6%;
+    --secondary: 220 20% 95%;
+    --secondary-foreground: 43 70% 30%;
+    --muted: 220 15% 92%;
+    --muted-foreground: 220 10% 40%;
+    --accent: 43 60% 92%;
+    --accent-foreground: 43 80% 25%;
+    --destructive: 0 80% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 220 15% 88%;
+    --input: 220 15% 88%;
+    --ring: 43 80% 56%;
+  }
+  /* Theme 2 Dark Mode Variant (True Deep Velvet Black & Bright Gold) */
+  [data-theme="theme-2"].dark, &:is(.dark [data-theme="theme-2"] *) {
+    --background: 220 40% 4%;      
+    --foreground: 43 50% 96%;      
+    --card: 220 35% 8%;
+    --card-foreground: 43 50% 96%;
+    --popover: 220 40% 4%;
+    --popover-foreground: 43 50% 96%;
+    --primary: 43 90% 52%;         
+    --primary-foreground: 220 40% 4%;
+    --secondary: 220 30% 12%;      
+    --secondary-foreground: 43 80% 85%;
+    --muted: 220 20% 14%;
+    --muted-foreground: 220 15% 60%;
+    --accent: 43 70% 12%;          
+    --accent-foreground: 43 90% 65%;
+    --border: 220 20% 14%;
+    --input: 220 20% 14%;
+    --ring: 43 90% 52%;
+  }
+
+  /* ========================================================
+     THEME 3: FIERY SUNSET (Alt + 3)
+     ======================================================== */
+  [data-theme="theme-3"] {
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 345 30% 15%;
+    --card: 345 25% 97%;
+    --card-foreground: 345 30% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 345 30% 15%;
+    --primary: 12 90% 52%;         /* Molten Red-Orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 350 30% 95%;
+    --secondary-foreground: 25 90% 30%;
+    --muted: 345 15% 92%;
+    --muted-foreground: 25 15% 45%;
+    --accent: 32 95% 92%;          /* Amber Tint */
+    --accent-foreground: 32 95% 35%;
+    --destructive: 0 80% 45%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 345 15% 88%;
+    --input: 345 15% 88%;
+    --ring: 12 90% 52%;
+  }
+  /* Theme 3 Dark Mode Variant (Obsidian Burgundy Smoke) */
+  [data-theme="theme-3"].dark, &:is(.dark [data-theme="theme-3"] *) {
+    --background: 345 40% 7%;      
+    --foreground: 25 95% 98%;
+    --card: 345 35% 11%;
+    --card-foreground: 25 95% 98%;
+    --popover: 345 40% 7%;
+    --popover-foreground: 25 95% 98%;
+    --primary: 12 95% 48%;         
+    --primary-foreground: 0 0% 100%;
+    --secondary: 350 45% 14%;
+    --secondary-foreground: 25 95% 85%;
+    --muted: 345 25% 12%;
+    --muted-foreground: 25 15% 60%;
+    --accent: 28 95% 40%;          
+    --accent-foreground: 0 0% 100%;
+    --border: 345 25% 15%;
+    --input: 345 25% 15%;
+    --ring: 12 95% 48%;
+  }
+
+  /* ========================================================
+     THEME 4: WHIMSICAL WINTER WONDERLAND (Alt + 4)
+     ======================================================== */
+  [data-theme="theme-4"] {
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 210 40% 15%;
+    --card: 210 30% 97%;             
+    --card-foreground: 210 40% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 40% 15%;
+    --primary: 210 50% 55%;        /* Ethereal Snowy Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 200 20% 93%;
+    --secondary-foreground: 210 40% 25%;
+    --muted: 210 15% 92%;
+    --muted-foreground: 210 15% 45%;
+    --accent: 16 90% 93%;          /* Snowy Peach */
+    --accent-foreground: 16 70% 35%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 20% 88%;
+    --input: 210 20% 88%;
+    --ring: 210 50% 55%;
+  }
+  /* Theme 4 Dark Mode Variant (Glacial Midnight Frost) */
+  [data-theme="theme-4"].dark, &:is(.dark [data-theme="theme-4"] *) {
+    --background: 210 35% 8%;      
+    --foreground: 210 25% 92%;
+    --card: 210 30% 12%;             
+    --card-foreground: 210 25% 92%;
+    --popover: 210 35% 8%;
+    --popover-foreground: 210 25% 92%;
+    --primary: 210 60% 48%;        
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 25% 16%;
+    --secondary-foreground: 210 20% 80%;
+    --muted: 210 20% 15%;
+    --muted-foreground: 210 10% 65%;
+    --accent: 16 40% 20%;          
+    --accent-foreground: 16 80% 85%;
+    --border: 210 25% 16%;
+    --input: 210 25% 16%;
+    --ring: 210 60% 48%;
+  }
+
+  /* ========================================================
+     THEME 5: OCEAN BREEZE (Alt + 5)
+     ======================================================== */
+  [data-theme="theme-5"] {
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 205 60% 12%;
+    --card: 205 25% 97%;
+    --card-foreground: 205 60% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 205 60% 12%;
+    --primary: 205 85% 45%;        /* Gentle Deep Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 205 30% 93%;
+    --secondary-foreground: 205 60% 20%;
+    --muted: 205 15% 90%;
+    --muted-foreground: 205 20% 45%;
+    --accent: 12 90% 92%;          /* Splash of Peachy Red */
+    --accent-foreground: 12 75% 35%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 205 25% 88%;
+    --input: 205 25% 88%;
+    --ring: 205 85% 45%;
+  }
+  /* Theme 5 Dark Mode Variant (Stormy Ocean Horizon) */
+  [data-theme="theme-5"].dark, &:is(.dark [data-theme="theme-5"] *) {
+    --background: 205 40% 7%;      
+    --foreground: 205 20% 94%;
+    --card: 205 35% 11%;
+    --card-foreground: 205 20% 94%;
+    --popover: 205 40% 7%;
+    --popover-foreground: 205 20% 94%;
+    --primary: 205 75% 52%;        
+    --primary-foreground: 0 0% 100%;
+    --secondary: 205 25% 15%;
+    --secondary-foreground: 205 20% 82%;
+    --muted: 205 20% 14%;
+    --muted-foreground: 205 10% 65%;
+    --accent: 12 50% 18%;          
+    --accent-foreground: 12 85% 85%;
+    --border: 205 25% 15%;
+    --input: 205 25% 15%;
+    --ring: 205 75% 52%;
+  }
+
+  /* ========================================================
+     THEME 6: DEEP OCEAN BLUE (Alt + 6)
+     ======================================================== */
+  [data-theme="theme-6"] {
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 230 30% 14%;
+    --card: 230 25% 97%;
+    --card-foreground: 230 30% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 230 30% 14%;
+    --primary: 175 75% 40%;        /* Cascading Blue-Green Teal */
+    --primary-foreground: 230 45% 7%;
+    --secondary: 245 25% 95%;      /* Deep Violet Tint */
+    --secondary-foreground: 175 40% 25%;
+    --muted: 230 15% 92%;
+    --muted-foreground: 230 10% 45%;
+    --accent: 250 40% 94%;
+    --accent-foreground: 175 60% 30%;
+    --destructive: 0 70% 40%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 230 20% 88%;
+    --input: 230 20% 88%;
+    --ring: 175 75% 40%;
+  }
+  /* Theme 6 Dark Mode Variant (The Abyssal Trench) */
+  [data-theme="theme-6"].dark, &:is(.dark [data-theme="theme-6"] *) {
+    --background: 230 50% 4%;      
+    --foreground: 175 50% 96%;
+    --card: 230 40% 8%;
+    --card-foreground: 175 50% 96%;
+    --popover: 230 50% 4%;
+    --popover-foreground: 175 50% 96%;
+    --primary: 175 85% 35%;        
+    --primary-foreground: 230 50% 4%;
+    --secondary: 245 35% 12%;      
+    --secondary-foreground: 175 50% 90%;
+    --muted: 230 25% 11%;
+    --muted-foreground: 230 10% 60%;
+    --accent: 250 50% 16%;
+    --accent-foreground: 175 70% 85%;
+    --border: 230 30% 12%;
+    --input: 230 30% 12%;
+    --ring: 175 85% 35%;
+  }
+
+  /* ========================================================
+     THEME 7: MONOCHROME BEACH (Alt + 7)
+     ======================================================== */
+  [data-theme="theme-7"] {
+    --background: 0 0% 100%;       /* Pure White */
+    --foreground: 210 25% 15%;     
+    --card: 40 30% 97%;
+    --card-foreground: 210 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 25% 15%;
+    --primary: 210 20% 35%;        /* Slate Gray */
+    --primary-foreground: 40 30% 98%;
+    --secondary: 180 25% 94%;      /* Smooth Minimal Teal */
+    --secondary-foreground: 210 25% 20%;
+    --muted: 210 10% 92%;
+    --muted-foreground: 210 15% 45%;
+    --accent: 180 30% 95%;
+    --accent-foreground: 210 25% 25%;
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 210 15% 88%;
+    --input: 210 15% 88%;
+    --ring: 210 20% 35%;
+  }
+  /* Theme 7 Dark Mode Variant (Midnight Stony Coast) */
+  [data-theme="theme-7"].dark, &:is(.dark [data-theme="theme-7"] *) {
+    --background: 210 25% 10%;     
+    --foreground: 40 20% 94%;     
+    --card: 210 20% 14%;
+    --card-foreground: 40 20% 94%;
+    --popover: 210 25% 10%;
+    --popover-foreground: 40 20% 94%;
+    --primary: 210 15% 75%;        
+    --primary-foreground: 210 25% 10%;
+    --secondary: 180 20% 16%;      
+    --secondary-foreground: 40 20% 85%;
+    --muted: 210 15% 15%;
+    --muted-foreground: 210 10% 60%;
+    --accent: 180 20% 18%;
+    --accent-foreground: 40 20% 90%;
+    --border: 210 15% 18%;
+    --input: 210 15% 18%;
+    --ring: 210 15% 75%;
+  }
+
+  /* Universal Dark Preset Fallback */
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 24 98% 58%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 220 8% 14%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 8% 14%;
+    --muted-foreground: 220 10% 72%;
+    --accent: 190 70% 35%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 24 98% 58%;
   }
 
   * {
     border-color: var(--color-border);
   }
-  
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+}
+
+@layer components {
+  /* 1. Sizing Adjustments: Fonts scaled to Base (16px) */
+  [data-sidebar="menu-button"] a {
+    @apply text-base py-3 px-3.5 rounded-md font-medium my-1 tracking-wide;
+    @apply !transition-all duration-200 ease-in-out;
+  }
+
+  /* Distinct hover effect with subtle transform */
+  [data-sidebar="menu-button"]:hover a {
+    @apply bg-accent text-accent-foreground translate-x-1;
+  }
+
+  /* Icon scaling bumped to match the base font scale */
+  [data-sidebar="menu-button"] a svg {
+    @apply w-5.5 h-5.5 mr-3.5 transition-transform duration-200;
+  }
+
+  /* 2. Enhanced Separator Lines (Thicker & Cleaner) */
+  [data-sidebar="menu-item"] {
+    @apply border-b-2 border-border/60 last:border-b-0;
+  }
+
+  /* Structural block padding tuning */
+  [data-sidebar="group-content"] [data-sidebar="menu"] {
+    @apply gap-0.5 py-1.5;
+  }
+
+  /* 3. Header Spacing Updates */
+  [data-sidebar="root"] header {
+    @apply pb-5 mb-3;
+  }
+
+  /* 4. Resizable Handle & Collapse Alignment */
+  [data-sidebar="rail"] {
+    @apply w-2 hover:w-2.5 bg-transparent hover:bg-primary/20 cursor-col-resize;
+    @apply transition-all duration-200 ease-in-out border-l-2 border-border/40;
+  }
+
+  /* Global Page Transition Shutter Overlay */
+  .page-transition-overlay {
+    @apply fixed top-0 left-0 h-screen pointer-events-none;
+    width: 150vw; 
+    background-color: hsl(var(--primary)); 
+    opacity: 1 !important; 
+    z-index: 9999 !important;
+    transition: background-color 0.3s ease;
   }
 }
