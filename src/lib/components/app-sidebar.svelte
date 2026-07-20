@@ -19,7 +19,10 @@
     Package,
     ChevronDown,
     LogOut,
-    Shield
+    Shield,
+
+    Bell
+
   } from "lucide-svelte";
 
   const menuConfig = {
@@ -33,7 +36,8 @@
         { title: "AI Assistant", url: "/ai-assistant", icon: Brain },
         { title: "Order History", url: "/history", icon: HistoryIcon },
         { title: "Favorites", url: "/favorites", icon: Heart },
-        { title: "Complaint", url: "/complaint", icon: Shield }
+        { title: "Complaint", url: "/complaint", icon: Shield },
+        { title: "Notification", url: "/notification", icon: Bell }
       ]
     },
     pharmacist: {
