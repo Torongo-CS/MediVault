@@ -11,11 +11,13 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { cn } from "$lib/utils.js";
   import type { HTMLAttributes } from "svelte/elements";
+  import { useId } from "svelte";
+
 
   let { class: className, ...restProps }: HTMLAttributes<HTMLDivElement> =
     $props();
 
-  const id = $props.id();
+  const id = useId();
 </script>
 
 <div class={cn("flex flex-col gap-6", className)} {...restProps}>
