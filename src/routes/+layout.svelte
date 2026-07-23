@@ -2,16 +2,13 @@
   import '../app.css';
   import favicon from '$lib/assets/favicon.svg';
   import { ModeWatcher } from "mode-watcher";
-  import { fly } from "svelte/transition";
   import * as Sidebar from "$lib/components/ui/sidebar";
   import AppSidebar from "$lib/components/app-sidebar.svelte";
-  import { afterNavigate, beforeNavigate } from '$app/navigation';
+  import { afterNavigate } from '$app/navigation';
   import { onMount } from 'svelte';
 
   let { children } = $props();
 
-  // Transition state
-  let isTransitioning = $state(false);
   let currentPath = $state("");
 
   // Theme states
@@ -71,19 +68,10 @@
     currentPath = window.location.pathname;
   });
 
-  beforeNavigate(() => {
-    isTransitioning = true;
-  });
-
   afterNavigate((nav) => {
     if (nav.to) {
       currentPath = nav.to.url.pathname;
     }
-
-    // Held open long enough to cover the quick 500ms swipe completely
-    setTimeout(() => {
-      isTransitioning = false;
-    }, 450); 
   });
 
   // Helper derived state to check if the user is on a auth page
@@ -103,17 +91,7 @@
 
 <ModeWatcher />
 
-<!-- 
-  The Solid Dark Orange Curtain Shutter 
-  Slides in from left (-100% to 0) and continues straight off to the right (0 to 100%)
--->
-{#if isTransitioning}
-  <div 
-    in:fly={{ x: '-100%', duration: 800 }}
-    out:fly={{ x: '100%', duration: 650 }}
-    class="page-transition-overlay"
-  ></div>
-{/if}
+
 
 {#if isAuthPage}
   <main class="w-screen h-screen relative overflow-hidden">
