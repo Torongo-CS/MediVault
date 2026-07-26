@@ -108,15 +108,15 @@
   }
 </script>
 
-<div class="dashboard-container max-w-7xl mx-auto h-[calc(100vh-2rem)] flex flex-col pt-8 pb-8 px-4 sm:px-8">
-  <div class="dashboard-header flex justify-between items-end mb-8 border-b border-border/50 pb-6 shrink-0">
+<div class="dashboard-container max-w-7xl mx-auto flex flex-col pt-6 pb-6 px-4 sm:px-8">
+  <div class="dashboard-header flex justify-between items-end mb-6 border-b border-border/50 pb-4 shrink-0">
     <div>
-      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">Complaints Support</h1>
-      <p class="text-muted-foreground mt-2 text-base md:text-lg">Manage and respond to user and pharmacy tickets.</p>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">Complaints Support</h1>
+      <p class="text-muted-foreground mt-1 text-sm md:text-base">Manage and respond to user and pharmacy tickets.</p>
     </div>
   </div>
 
-  <div class="flex flex-1 gap-0 overflow-hidden bg-card border border-border rounded-xl shadow-md min-h-[500px]">
+  <div class="flex gap-0 overflow-hidden bg-card border border-border rounded-xl shadow-md h-[600px]">
     
     <!-- Sidebar: Ticket List -->
     <div class="w-1/3 flex flex-col border-r border-border/50 bg-muted/10 shrink-0 min-w-[300px]">
