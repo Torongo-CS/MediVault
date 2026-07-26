@@ -91,7 +91,7 @@
 <div class="dashboard-container max-w-7xl mx-auto">
   <div class="dashboard-header flex justify-between items-end mb-10 border-b border-border/50 pb-6">
     <div>
-      <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground">User Management</h1>
+      <h1 class="text-4xl md:text-4xl font-extrabold tracking-tight text-foreground">User Management</h1>
       <p class="text-muted-foreground mt-2 text-base md:text-lg">Manage platform users, roles, and access.</p>
     </div>
     <Button onclick={openCreateDialog} class="gap-2 shadow-sm h-11 px-6">
