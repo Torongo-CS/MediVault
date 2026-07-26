@@ -169,23 +169,23 @@
     {
       "_id": "ticket_1",
       "creatorId": "user_3",
-      "title": "Order not ready",
+      "title": "Pharmacist refused refund after overcharging",
       "status": "open",
       "createdAt": 1704067200000,
-      "updatedAt": 1704067200000
+      "updatedAt": 1704068200000
     },
     {
       "_id": "ticket_2",
-      "creatorId": "user_4",
-      "title": "Wrong medication given",
+      "creatorId": "user_2",
+      "title": "Missing weekly commission payout",
       "status": "resolved",
       "createdAt": 1704067200000,
-      "updatedAt": 1704067500000
+      "updatedAt": 1704153600000
     },
     {
       "_id": "ticket_3",
-      "creatorId": "user_2",
-      "title": "System glitch on checkout",
+      "creatorId": "user_4",
+      "title": "Data deletion request (GDPR)",
       "status": "open",
       "createdAt": 1704067200000,
       "updatedAt": 1704067200000
@@ -196,22 +196,50 @@
       "_id": "msg_1",
       "ticketId": "ticket_1",
       "senderId": "user_3",
-      "message": "I arrived but the pharmacy was closed.",
+      "message": "Hello Admin, I visited the pharmacy managed by pharmacist@medivault.com today. They charged me $50 more than the app stated and refused to give me a refund. Please help.",
       "timestamp": 1704067200000
     },
     {
       "_id": "msg_2",
-      "ticketId": "ticket_2",
-      "senderId": "user_4",
-      "message": "Got wrong meds.",
-      "timestamp": 1704067200000
+      "ticketId": "ticket_1",
+      "senderId": "user_1",
+      "message": "We apologize for this experience. We are temporarily suspending their payout while we investigate this discrepancy. Can you provide the receipt?",
+      "timestamp": 1704067500000
     },
     {
       "_id": "msg_3",
+      "ticketId": "ticket_1",
+      "senderId": "user_3",
+      "message": "Yes, I have attached it to my order profile. Thank you for acting quickly.",
+      "timestamp": 1704068200000
+    },
+    {
+      "_id": "msg_4",
+      "ticketId": "ticket_2",
+      "senderId": "user_2",
+      "message": "Hi, my dashboard says $450 was transferred to my bank on Monday, but it hasn't arrived yet. Is there an issue with the payment gateway?",
+      "timestamp": 1704067200000
+    },
+    {
+      "_id": "msg_5",
       "ticketId": "ticket_2",
       "senderId": "user_1",
-      "message": "We have processed a refund.",
+      "message": "It appears there was a bank holiday routing delay. It should reflect in your account by tomorrow morning.",
       "timestamp": 1704067500000
+    },
+    {
+      "_id": "msg_6",
+      "ticketId": "ticket_2",
+      "senderId": "user_2",
+      "message": "Understood, it just came through. Thank you!",
+      "timestamp": 1704153600000
+    },
+    {
+      "_id": "msg_7",
+      "ticketId": "ticket_3",
+      "senderId": "user_4",
+      "message": "I would like to permanently delete my account and have all my medical data scrubbed from your servers in compliance with GDPR. How do I proceed?",
+      "timestamp": 1704067200000
     }
   ],
   "notifications": [
