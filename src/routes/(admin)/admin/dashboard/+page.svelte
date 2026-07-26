@@ -7,7 +7,7 @@
   import { MessageSquare, Users, Search, Bot } from "lucide-svelte";
   
   // 1. Calculate Metrics
-  const totalRevenue = dummyData.transactionRecords.reduce((sum, record) => sum + record.totalRevenue, 0);
+  const totalMedicines = dummyData.medicines.length;
   const totalUsers = dummyData.users.length;
   const totalSales = dummyData.transactionRecords.length;
   const activeComplaints = dummyData.complaintTickets.filter(t => t.status === "open").length;
@@ -30,19 +30,15 @@
     };
   }).slice(0, 5);
 
-  // 3. Process Chart Data (Revenue by Medicine)
-  const revenueByMedicine: Record<string, number> = {};
-  dummyData.transactionRecords.forEach(trans => {
-    trans.itemsSnapshot.forEach(item => {
-        const med = dummyData.medicines.find(m => m._id === item.medicineId);
-        const name = med ? med.name : 'Unknown';
-        const revenue = item.quantity * item.unitSellingPriceAtSale;
-        revenueByMedicine[name] = (revenueByMedicine[name] || 0) + revenue;
-    });
+  // 3. Process Chart Data (User Roles)
+  const usersByRole: Record<string, number> = {};
+  dummyData.users.forEach(user => {
+    const role = user.role;
+    usersByRole[role] = (usersByRole[role] || 0) + 1;
   });
 
-  const chartData = Object.entries(revenueByMedicine).map(([name, value]) => ({
-    name,
+  const chartData = Object.entries(usersByRole).map(([name, value]) => ({
+    name: name.charAt(0).toUpperCase() + name.slice(1),
     value
   }));
   // Pie Chart Calculation
@@ -78,15 +74,16 @@
   <div class="dashboard-grid">
     <Card.Root>
       <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
-        <Card.Title class="dashboard-card-title">Total Revenue</Card.Title>
+        <Card.Title class="dashboard-card-title">Total Medicines</Card.Title>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="dashboard-card-icon">
-          <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          <path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/>
+          <path d="m8.5 8.5 7 7"/>
         </svg>
       </Card.Header>
       <Card.Content>
-        <div class="dashboard-card-value">${totalRevenue.toFixed(2)}</div>
+        <div class="dashboard-card-value">{totalMedicines}</div>
         <br>
-        <p class="text-xs text-muted-foreground">Across all transactions</p>
+        <p class="text-xs text-muted-foreground">In system catalog</p>
       </Card.Content>
     </Card.Root>
     <Card.Root>
@@ -182,7 +179,7 @@
   <div class="dashboard-section mt-8">
     <Card.Root class="dashboard-chart-area">
       <Card.Header>
-        <Card.Title>Revenue by Medicine</Card.Title>
+        <Card.Title>User Distribution</Card.Title>
       </Card.Header>
       <Card.Content>
         <div class="flex flex-col md:flex-row items-center justify-center gap-12 h-[300px] w-full pt-4 pb-4">
@@ -193,7 +190,7 @@
           >
             <!-- Donut Hole -->
             <div class="absolute inset-5 bg-card rounded-full flex items-center justify-center shadow-inner">
-              <span class="text-sm font-semibold text-muted-foreground">Revenue</span>
+              <span class="text-sm font-semibold text-muted-foreground">Users</span>
             </div>
           </div>
           
@@ -205,7 +202,7 @@
                 <div class="text-sm font-medium">
                   {data.name} 
                   <span class="text-muted-foreground ml-1">
-                    (${data.value.toFixed(2)} - {data.percentage.toFixed(1)}%)
+                    ({data.value} - {data.percentage.toFixed(1)}%)
                   </span>
                 </div>
               </div>
