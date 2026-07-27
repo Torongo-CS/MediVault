@@ -1,0 +1,287 @@
+{
+  "users": [
+    {
+      "_id": "user_1",
+      "role": "admin",
+      "email": "admin@medivault.com",
+      "passwordHash": "hashed_pass_1",
+      "imageUrl": "https://example.com/admin.jpg",
+      "isActive": true
+    },
+    {
+      "_id": "user_2",
+      "role": "pharmacist",
+      "email": "pharmacist@medivault.com",
+      "passwordHash": "hashed_pass_2",
+      "isActive": true
+    },
+    {
+      "_id": "user_3",
+      "role": "customer",
+      "email": "customer1@gmail.com",
+      "passwordHash": "hashed_pass_3",
+      "isActive": true
+    },
+    {
+      "_id": "user_4",
+      "role": "customer",
+      "email": "customer2@gmail.com",
+      "passwordHash": "hashed_pass_4",
+      "isActive": false
+    }
+  ],
+  "medicines": [
+    {
+      "_id": "med_1",
+      "name": "Paracetamol 500mg",
+      "genericName": "Paracetamol",
+      "description": "Pain reliever and fever reducer",
+      "imageUrl": "https://example.com/para.jpg",
+      "symptoms": ["headache", "fever", "pain"],
+      "requiresPrescription": false,
+      "stock": 100,
+      "reservedQuantity": 10,
+      "unitCostingPrice": 2.5,
+      "unitSellingPrice": 5.0,
+      "expiryDate": 1735689600000,
+      "conflicts": ["Warfarin"]
+    },
+    {
+      "_id": "med_2",
+      "name": "Amoxicillin 250mg",
+      "genericName": "Amoxicillin",
+      "description": "Penicillin antibiotic",
+      "symptoms": ["infection"],
+      "requiresPrescription": true,
+      "stock": 50,
+      "reservedQuantity": 0,
+      "unitCostingPrice": 8.0,
+      "unitSellingPrice": 15.0,
+      "expiryDate": 1735689600000,
+      "conflicts": []
+    },
+    {
+      "_id": "med_3",
+      "name": "Ibuprofen 400mg",
+      "genericName": "Ibuprofen",
+      "description": "Nonsteroidal anti-inflammatory drug",
+      "symptoms": ["fever", "inflammation", "pain"],
+      "requiresPrescription": false,
+      "stock": 200,
+      "reservedQuantity": 50,
+      "unitCostingPrice": 3.0,
+      "unitSellingPrice": 6.5,
+      "expiryDate": 1735689600000,
+      "conflicts": ["Aspirin"]
+    }
+  ],
+  "reservations": [
+    {
+      "_id": "res_1",
+      "customerId": "user_3",
+      "pharmacistId": "user_2",
+      "medsList": [
+        {
+          "medicineId": "med_1",
+          "quantity": 2
+        }
+      ],
+      "totalUnitsRequested": 2,
+      "totalCosting": 10.0,
+      "createdAt": 1704067200000,
+      "pickupDate": 1704153600000,
+      "status": "pending"
+    },
+    {
+      "_id": "res_2",
+      "customerId": "user_3",
+      "pharmacistId": "user_2",
+      "medsList": [
+        {
+          "medicineId": "med_2",
+          "quantity": 1
+        }
+      ],
+      "totalUnitsRequested": 1,
+      "totalCosting": 15.0,
+      "createdAt": 1704067200000,
+      "pickupDate": 1704153600000,
+      "prescriptionImageUrl": "https://example.com/prescription.jpg",
+      "status": "completed"
+    },
+    {
+      "_id": "res_3",
+      "customerId": "user_4",
+      "medsList": [
+        {
+          "medicineId": "med_3",
+          "quantity": 5
+        }
+      ],
+      "totalUnitsRequested": 5,
+      "totalCosting": 32.5,
+      "createdAt": 1704067200000,
+      "pickupDate": 1704153600000,
+      "status": "cancelled"
+    }
+  ],
+  "prescriptions": [
+    {
+      "_id": "pres_1",
+      "name": "Amoxicillin Prescription",
+      "dateUploaded": 1704067200000,
+      "imageUrl": "https://example.com/prescription.jpg",
+      "userId": "user_3"
+    },
+    {
+      "_id": "pres_2",
+      "name": "Eye Drops",
+      "dateUploaded": 1704067200000,
+      "imageUrl": "https://example.com/eye_drops.jpg",
+      "userId": "user_3"
+    },
+    {
+      "_id": "pres_3",
+      "name": "Insulin Script",
+      "dateUploaded": 1704067200000,
+      "imageUrl": "https://example.com/insulin.jpg",
+      "userId": "user_4"
+    }
+  ],
+  "favorites": [
+    {
+      "_id": "fav_1",
+      "customerId": "user_3",
+      "pharmacistId": "user_2"
+    },
+    {
+      "_id": "fav_2",
+      "customerId": "user_4",
+      "pharmacistId": "user_2"
+    },
+    {
+      "_id": "fav_3",
+      "customerId": "user_3",
+      "pharmacistId": "user_1"
+    }
+  ],
+  "complaintTickets": [
+    {
+      "_id": "ticket_1",
+      "creatorId": "user_3",
+      "title": "Order not ready",
+      "status": "open",
+      "createdAt": 1704067200000,
+      "updatedAt": 1704067200000
+    },
+    {
+      "_id": "ticket_2",
+      "creatorId": "user_4",
+      "title": "Wrong medication given",
+      "status": "resolved",
+      "createdAt": 1704067200000,
+      "updatedAt": 1704067500000
+    },
+    {
+      "_id": "ticket_3",
+      "creatorId": "user_2",
+      "title": "System glitch on checkout",
+      "status": "open",
+      "createdAt": 1704067200000,
+      "updatedAt": 1704067200000
+    }
+  ],
+  "complaintMessages": [
+    {
+      "_id": "msg_1",
+      "ticketId": "ticket_1",
+      "senderId": "user_3",
+      "message": "I arrived but the pharmacy was closed.",
+      "timestamp": 1704067200000
+    },
+    {
+      "_id": "msg_2",
+      "ticketId": "ticket_2",
+      "senderId": "user_4",
+      "message": "Got wrong meds.",
+      "timestamp": 1704067200000
+    },
+    {
+      "_id": "msg_3",
+      "ticketId": "ticket_2",
+      "senderId": "user_1",
+      "message": "We have processed a refund.",
+      "timestamp": 1704067500000
+    }
+  ],
+  "notifications": [
+    {
+      "_id": "notif_1",
+      "senderId": "user_2",
+      "receiverId": "user_3",
+      "message": "Your order is ready for pickup.",
+      "isRead": false,
+      "timestamp": 1704067200000
+    },
+    {
+      "_id": "notif_2",
+      "senderId": "user_1",
+      "receiverId": "user_2",
+      "message": "Please review new policy.",
+      "isRead": true,
+      "timestamp": 1704067200000
+    },
+    {
+      "_id": "notif_3",
+      "senderId": "user_2",
+      "receiverId": "user_4",
+      "message": "Prescription rejected.",
+      "isRead": false,
+      "timestamp": 1704067200000
+    }
+  ],
+  "transactionRecords": [
+    {
+      "_id": "trans_1",
+      "reservationId": "res_2",
+      "completedAt": 1704153600000,
+      "itemsSnapshot": [
+        {
+          "medicineId": "med_2",
+          "quantity": 1,
+          "unitCostingPriceAtSale": 8.0,
+          "unitSellingPriceAtSale": 15.0
+        }
+      ],
+      "totalRevenue": 15.0
+    },
+    {
+      "_id": "trans_2",
+      "reservationId": "res_2",
+      "completedAt": 1704153600000,
+      "itemsSnapshot": [
+        {
+          "medicineId": "med_1",
+          "quantity": 3,
+          "unitCostingPriceAtSale": 2.5,
+          "unitSellingPriceAtSale": 5.0
+        }
+      ],
+      "totalRevenue": 15.0
+    },
+    {
+      "_id": "trans_3",
+      "reservationId": "res_2",
+      "completedAt": 1704153600000,
+      "itemsSnapshot": [
+        {
+          "medicineId": "med_3",
+          "quantity": 2,
+          "unitCostingPriceAtSale": 3.0,
+          "unitSellingPriceAtSale": 6.5
+        }
+      ],
+      "totalRevenue": 13.0
+    }
+  ]
+}

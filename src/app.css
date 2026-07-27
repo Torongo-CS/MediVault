@@ -436,4 +436,36 @@
     z-index: 9999 !important;
     transition: background-color 0.3s ease;
   }
+
+  /* 5. Dashboard Styles */
+  .dashboard-container {
+    @apply p-8 space-y-8 bg-background min-h-screen;
+  }
+  .dashboard-header {
+    @apply flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8;
+  }
+  .dashboard-title {
+    @apply text-3xl font-bold tracking-tight text-foreground;
+  }
+  .dashboard-grid {
+    @apply grid gap-4 md:grid-cols-2 lg:grid-cols-4;
+  }
+  .dashboard-card-title {
+    @apply text-sm font-medium text-muted-foreground;
+  }
+  .dashboard-card-value {
+    @apply text-2xl font-bold text-foreground;
+  }
+  .dashboard-card-icon {
+    @apply h-4 w-4 text-muted-foreground;
+  }
+  .dashboard-section {
+    @apply grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-4;
+  }
+  .dashboard-chart-area {
+    @apply col-span-4;
+  }
+  .dashboard-recent-area {
+    @apply col-span-3;
+  }
 }
