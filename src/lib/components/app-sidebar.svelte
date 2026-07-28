@@ -1,7 +1,6 @@
 <!-- src/lib/components/app-sidebar.svelte -->
 <script lang="ts">
   import * as Sidebar from "$lib/components/ui/sidebar";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
   import ThemeToggle from "./ThemeToggle.svelte";
   import { userSession } from "$lib/session.svelte";
   import {
@@ -17,7 +16,6 @@
     BarChart3,
     CheckSquare,
     Package,
-    ChevronDown,
     LogOut,
     Shield,
 
@@ -81,22 +79,15 @@
       </div>
     </div>
 
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger class="w-full flex items-center justify-between px-3 py-2 rounded-md border text-xs font-semibold bg-muted/50 hover:bg-muted transition-colors">
-        <div class="flex items-center gap-2">
-          <Shield class="w-3.5 h-3.5 text-primary" />
-          <span>Active Role: <strong class="text-foreground capitalize">{userSession.role}</strong></span>
-        </div>
-        <ChevronDown class="w-3.5 h-3.5 text-muted-foreground" />
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content class="w-[200px]">
-        <DropdownMenu.Label class="text-xs text-muted-foreground">Switch Session Role</DropdownMenu.Label>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Item onclick={() => userSession.setRole('customer')} class="text-xs">Customer Portal</DropdownMenu.Item>
-        <DropdownMenu.Item onclick={() => userSession.setRole('pharmacist')} class="text-xs">Pharmacist Queue</DropdownMenu.Item>
-        <DropdownMenu.Item onclick={() => userSession.setRole('admin')} class="text-xs">Admin Console</DropdownMenu.Item>
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
+    <div class="w-full flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/50">
+      <Shield class="w-3.5 h-3.5 text-primary shrink-0" />
+      <div class="flex flex-col min-w-0">
+        <span class="text-xs font-semibold truncate">{userSession.name || "Signed in"}</span>
+        <span class="text-[10px] text-muted-foreground truncate">
+          {userSession.email}{userSession.email ? " · " : ""}<span class="capitalize">{userSession.role}</span>
+        </span>
+      </div>
+    </div>
   </Sidebar.Header>
 
   <Sidebar.Content>
@@ -123,16 +114,18 @@
 
   <Sidebar.Footer class="p-4 flex justify-between items-center flex-row border-t bg-muted/20">
     <ThemeToggle />
-    <Sidebar.MenuItem class="list-none">
-      <Sidebar.MenuButton class="w-fit hover:bg-destructive/10">
-        {#snippet child({ props })}
-          <a href="/login" {...props} class="flex items-center text-destructive font-semibold">
-            <LogOut class="w-4 h-4 mr-2" />
-            <span>Logout</span>
-          </a>
-        {/snippet}
-      </Sidebar.MenuButton>
-    </Sidebar.MenuItem>
+    <form method="POST" action="/logout" class="contents">
+      <Sidebar.MenuItem class="list-none">
+        <Sidebar.MenuButton class="w-fit hover:bg-destructive/10">
+          {#snippet child({ props })}
+            <button type="submit" {...props} class="flex items-center text-destructive font-semibold">
+              <LogOut class="w-4 h-4 mr-2" />
+              <span>Logout</span>
+            </button>
+          {/snippet}
+        </Sidebar.MenuButton>
+      </Sidebar.MenuItem>
+    </form>
   </Sidebar.Footer>
   <Sidebar.Rail />
 </Sidebar.Root>
