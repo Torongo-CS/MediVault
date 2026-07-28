@@ -11,7 +11,6 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { cn } from "$lib/utils.js";
   import type { HTMLAttributes } from "svelte/elements";
-
   let { class: className, ...restProps }: HTMLAttributes<HTMLDivElement> =
     $props();
 
