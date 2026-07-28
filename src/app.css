@@ -430,10 +430,389 @@
   /* Global Page Transition Shutter Overlay */
   .page-transition-overlay {
     @apply fixed top-0 left-0 h-screen pointer-events-none;
-    width: 150vw; 
-    background-color: hsl(var(--primary)); 
-    opacity: 1 !important; 
+    width: 150vw;
+    background-color: hsl(var(--primary));
+    opacity: 1 !important;
     z-index: 9999 !important;
     transition: background-color 0.3s ease;
   }
+
+  /* ============================================================
+     CUSTOMER PORTAL — SHARED PRIMITIVES
+     ============================================================ */
+
+  .page-root { @apply space-y-6; }
+
+  .form-label {
+    @apply text-xs font-semibold text-foreground block mb-1.5;
+  }
+
+  .section-title { @apply text-sm font-bold text-foreground; }
+
+  .icon-box {
+    @apply h-10 w-10 rounded-lg flex items-center justify-center shrink-0;
+  }
+  .icon-box--sm {
+    @apply h-8 w-8 rounded-full flex items-center justify-center shrink-0;
+  }
+  .icon-box--lg {
+    @apply h-14 w-14 rounded-2xl flex items-center justify-center;
+  }
+
+  .card-interactive {
+    @apply hover:shadow-md hover:border-primary/20 transition-all duration-200;
+  }
+
+  .meta-row {
+    @apply flex items-center gap-2 text-xs text-muted-foreground;
+  }
+
+  /* ============================================================
+     EMPTY STATE
+     ============================================================ */
+
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-16 px-6 text-center;
+  }
+  .empty-state__icon-wrap {
+    @apply h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-5;
+  }
+  .empty-state__title { @apply text-lg font-semibold text-foreground mb-1.5; }
+  .empty-state__desc  { @apply text-sm text-muted-foreground max-w-sm mb-6; }
+
+  /* ============================================================
+     PAGE HEADER
+     ============================================================ */
+
+  .page-header       { @apply space-y-2 mb-6; }
+  .page-header__row  {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3;
+  }
+  .page-header__title    { @apply text-2xl font-bold tracking-tight text-foreground; }
+  .page-header__subtitle { @apply text-sm text-muted-foreground mt-1; }
+  .page-header__actions  { @apply flex items-center gap-2 shrink-0; }
+
+  /* ============================================================
+     QUANTITY SELECTOR
+     ============================================================ */
+
+  .qty-selector {
+    @apply inline-flex items-center gap-0 rounded-lg border bg-background overflow-hidden;
+  }
+
+  /* ============================================================
+     PHARMACY CARD
+     ============================================================ */
+
+  .pharm-card--compact {
+    @apply block min-w-[220px] max-w-[250px] rounded-xl border bg-card;
+    @apply hover:shadow-lg hover:border-primary/30 transition-all duration-300 overflow-hidden;
+  }
+  .pharm-card--full { @apply block; }
+
+  .pharm-card__banner {
+    @apply relative flex items-center justify-center overflow-hidden;
+  }
+  .pharm-card__initials {
+    @apply text-white font-black drop-shadow-md select-none;
+  }
+  .pharm-card__fav-btn {
+    @apply absolute top-2.5 right-2.5 h-8 w-8 rounded-full bg-black/30 backdrop-blur-sm;
+    @apply flex items-center justify-center hover:bg-black/50 transition-colors;
+  }
+  .pharm-card__body    { @apply p-3; }
+  .pharm-card__name    {
+    @apply font-bold text-foreground truncate transition-colors;
+    :where(.group):hover & { @apply text-primary; }
+  }
+  .pharm-card__desc    { @apply text-xs text-muted-foreground mb-3 line-clamp-2; }
+  .pharm-card__meta-list { @apply space-y-1.5 mb-4; }
+  .pharm-card__cta {
+    @apply w-full flex items-center justify-center gap-1.5 text-xs font-semibold border rounded-md py-2 px-3;
+    @apply transition-all duration-200;
+    :where(.group):hover & { @apply bg-primary text-primary-foreground border-primary; }
+  }
+
+  /* ============================================================
+     MEDICINE CARD
+     ============================================================ */
+
+  .med-card__banner {
+    @apply relative h-36 flex items-center justify-center overflow-hidden;
+  }
+  .med-card__badge {
+    @apply inline-flex items-center gap-1 text-[10px] font-semibold text-white px-2 py-0.5 rounded-full;
+  }
+  .med-card__rx-overlay  { @apply absolute top-2.5 left-2.5 flex gap-1.5; }
+  .med-card__stk-overlay { @apply absolute bottom-2.5 right-2.5; }
+  .med-card__name    {
+    @apply font-bold text-sm text-foreground transition-colors line-clamp-1;
+    :where(.group):hover & { @apply text-primary; }
+  }
+  .med-card__generic { @apply text-xs text-muted-foreground mb-2 line-clamp-1; }
+  .med-card__symptoms { @apply flex flex-wrap gap-1 mb-3; }
+  .med-card__footer  { @apply flex items-center justify-between mt-2 pt-3 border-t; }
+  .med-card__price   { @apply text-lg font-bold text-primary; }
+  .med-card__unit    { @apply text-[10px] text-muted-foreground ml-0.5; }
+
+  /* ============================================================
+     TOP BAR & NOTIFICATION POPOVER
+     ============================================================ */
+
+  .topbar         { @apply flex items-center justify-between gap-4 pb-4 mb-2 border-b; }
+  .topbar__title  { @apply text-lg font-bold text-foreground tracking-tight; }
+  .topbar__actions { @apply flex items-center gap-1.5; }
+  .topbar__icon-btn { @apply relative h-9 w-9 rounded-lg hover:bg-muted; }
+  .topbar__count-badge {
+    @apply absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 rounded-full text-[10px] font-bold;
+    @apply flex items-center justify-center px-1;
+  }
+
+  .notif-pop__header { @apply flex items-center justify-between px-4 py-3 border-b; }
+  .notif-pop__header-title { @apply text-sm font-bold text-foreground; }
+  .notif-pop__footer { @apply p-2 border-t; }
+
+  .notif-item       { @apply flex items-start gap-3 px-4 py-3 transition-colors; }
+  .notif-item--unread { @apply bg-primary/5; }
+  .notif-item--read   { @apply hover:bg-muted/40; }
+  .notif-item__icon  {
+    @apply h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5;
+  }
+  .notif-item__title { @apply text-xs font-semibold text-foreground; }
+  .notif-item__msg   { @apply text-[11px] text-muted-foreground line-clamp-2 mt-0.5; }
+  .notif-item__time  { @apply text-[10px] text-muted-foreground shrink-0 mt-0.5; }
+
+  /* ============================================================
+     CART DRAWER
+     ============================================================ */
+
+  .cart-pharmacy-label { @apply px-5 py-3 bg-muted/40 border-b; }
+  .cart-items-list     { @apply px-5 py-3 space-y-0; }
+  .cart-item__name     { @apply text-sm font-semibold text-foreground truncate; }
+  .cart-item__generic  { @apply text-[11px] text-muted-foreground truncate; }
+  .cart-item__remove-btn {
+    @apply shrink-0 h-7 w-7 rounded-md hover:bg-destructive/10 flex items-center justify-center transition-colors;
+  }
+  .cart-item__price      { @apply text-sm font-bold text-foreground; }
+  .cart-item__unit-price { @apply text-[10px] text-muted-foreground; }
+  .cart-item__rx-warn {
+    @apply mt-2 flex items-center gap-1.5 text-[10px] text-amber-600 dark:text-amber-400 font-medium;
+  }
+  .cart-footer        { @apply border-t bg-card px-5 py-4 space-y-3; }
+  .cart-footer__rx-alert {
+    @apply flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20;
+  }
+  .cart-footer__total-row    { @apply flex items-center justify-between; }
+  .cart-footer__total-label  { @apply text-sm font-medium text-muted-foreground; }
+  .cart-footer__total-amount { @apply text-xl font-bold text-foreground; }
+  .cart-footer__actions      { @apply flex gap-2; }
+
+  .cart-pickup-date {
+    @apply flex flex-col gap-1.5 p-3 rounded-lg bg-muted/40 border border-border;
+  }
+  .cart-pickup-date__label {
+    @apply flex items-center gap-1.5 text-xs font-semibold text-foreground;
+  }
+  .cart-pickup-date__input {
+    @apply w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1;
+    @apply transition-colors;
+  }
+  .cart-pickup-date__reminder {
+    @apply flex items-center gap-1.5 text-[11px] text-primary font-medium mt-0.5;
+  }
+
+  /* ============================================================
+     DASHBOARD
+     ============================================================ */
+
+  .welcome-banner {
+    @apply p-5 sm:p-6 bg-gradient-to-r from-primary/5 via-primary/10 to-transparent;
+    @apply border-primary/10 overflow-hidden relative;
+  }
+  .welcome-banner__content  { @apply relative z-10; }
+  .welcome-banner__date     { @apply text-xs text-muted-foreground font-medium mb-1; }
+  .welcome-banner__greeting { @apply text-2xl font-bold text-foreground mb-1; }
+  .welcome-banner__subtitle { @apply text-sm text-muted-foreground; }
+
+  .stat-cards-grid  { @apply grid grid-cols-1 sm:grid-cols-3 gap-5; }
+  .stat-card__inner { @apply flex items-center justify-between; }
+  .stat-card__value { @apply text-3xl font-bold text-foreground; }
+  .stat-card__label { @apply text-sm text-muted-foreground font-medium mt-0.5; }
+
+  .quick-actions-grid { @apply grid grid-cols-2 gap-3; }
+  .quick-action-item  {
+    @apply flex items-center gap-4 p-4 rounded-xl border;
+    @apply hover:shadow-md hover:border-primary/20 transition-all duration-200;
+  }
+  .quick-action-item__label {
+    @apply text-sm font-semibold text-foreground transition-colors leading-tight;
+    :where(.group):hover & { @apply text-primary; }
+  }
+
+  .dash-notif-item         { @apply flex items-start gap-3 p-3 rounded-lg transition-colors; }
+  .dash-notif-item--unread { @apply bg-primary/5 border-l-2 border-l-primary; }
+  .dash-notif-item--read   { @apply hover:bg-muted/50; }
+  .dash-notif-item__icon   {
+    @apply h-9 w-9 rounded-full bg-muted flex items-center justify-center shrink-0 mt-0.5;
+  }
+  .dash-notif-item__title { @apply text-sm font-semibold text-foreground; }
+  .dash-notif-item__msg   { @apply text-xs text-muted-foreground line-clamp-1 mt-0.5; }
+  .dash-notif-item__time  { @apply text-[11px] text-muted-foreground shrink-0; }
+
+  /* ============================================================
+     PHARMACY DETAIL PAGE
+     ============================================================ */
+
+  .pharm-banner-card    { @apply rounded-xl border overflow-hidden bg-card; }
+  .pharm-banner__grad   { @apply flex items-center justify-center relative; }
+  .pharm-banner__initials { @apply text-white font-black text-5xl drop-shadow-lg select-none; }
+  .pharm-banner__info   { @apply p-5 sm:p-6; }
+  .pharm-banner__name   { @apply text-xl font-bold text-foreground mb-1; }
+  .pharm-banner__desc   { @apply text-sm text-muted-foreground mb-3 max-w-xl; }
+  .pharm-banner__meta   { @apply flex flex-wrap gap-x-5 gap-y-1.5; }
+  .pharm-banner__meta-item {
+    @apply inline-flex items-center gap-1.5 text-xs text-muted-foreground;
+  }
+
+  .filter-chip-group { @apply flex gap-2 flex-wrap; }
+
+  .cart-summary-bar       { @apply fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-sm shadow-lg; }
+  .cart-summary-bar__inner { @apply max-w-7xl mx-auto px-6 py-3 flex items-center justify-between; }
+  .cart-summary-bar__info  { @apply flex items-center gap-3; }
+  .cart-summary-bar__count { @apply text-sm font-semibold text-foreground; }
+  .cart-summary-bar__total { @apply text-xs text-muted-foreground; }
+
+  /* ============================================================
+     MEDICINE DETAIL PAGE
+     ============================================================ */
+
+  .med-detail__image    { @apply rounded-xl overflow-hidden aspect-square flex items-center justify-center; }
+  .med-detail__title    { @apply text-2xl font-bold text-foreground mb-1; }
+  .med-detail__generic  { @apply text-sm text-muted-foreground; }
+  .med-detail__price    { @apply text-3xl font-bold text-primary; }
+  .med-detail__rx-warn  {
+    @apply flex items-start gap-2.5 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20;
+  }
+  .med-detail__section-label {
+    @apply text-xs font-bold text-foreground uppercase tracking-wider mb-2;
+  }
+  .med-detail__symptoms { @apply flex flex-wrap gap-1.5; }
+  .med-detail__dates    { @apply flex gap-6 text-xs text-muted-foreground; }
+  .med-detail__cart-box { @apply p-4 bg-muted/30; }
+  .med-detail__ai-dots  { @apply flex items-center gap-2 text-xs text-muted-foreground py-4; }
+  .med-detail__ai-result { @apply p-3.5 rounded-lg bg-muted border; }
+
+  /* ============================================================
+     ORDER HISTORY
+     ============================================================ */
+
+  .history-stats-grid        { @apply grid grid-cols-1 sm:grid-cols-3 gap-4; }
+  .history-stat-card__inner  { @apply flex items-center gap-3; }
+  .history-stat-card__value  { @apply text-xl font-bold text-foreground; }
+  .history-stat-card__label  { @apply text-[11px] text-muted-foreground; }
+
+  .order-card__header   { @apply flex items-center gap-2 mb-1; }
+  .order-card__pharmacy { @apply text-sm font-semibold text-foreground truncate; }
+  .order-card__summary  { @apply text-xs text-muted-foreground line-clamp-1 mb-1.5; }
+  .order-card__meta     { @apply flex items-center gap-3 text-[11px] text-muted-foreground; }
+  .order-card__amount   { @apply font-semibold text-foreground; }
+
+  /* ============================================================
+     PRESCRIPTIONS
+     ============================================================ */
+
+  .upload-dropzone       { @apply border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer; }
+  .upload-dropzone__icon { @apply h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center; }
+  .upload-dropzone__title { @apply text-sm font-semibold text-foreground; }
+  .upload-dropzone__hint  { @apply text-xs text-muted-foreground mt-0.5; }
+
+  .rx-grid              { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4; }
+  .rx-card__thumb       { @apply h-32 bg-muted flex items-center justify-center relative; }
+  .rx-card__overlay     {
+    @apply absolute inset-0 bg-black/0 transition-all duration-200;
+    @apply flex items-center justify-center gap-2 opacity-0;
+    :where(.group):hover & { @apply bg-black/40 opacity-100; }
+  }
+  .rx-card__overlay-btn {
+    @apply h-8 w-8 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-colors;
+  }
+  .rx-card__filename  { @apply text-sm font-semibold text-foreground truncate; }
+  .rx-card__notes     { @apply text-xs text-muted-foreground mt-0.5 line-clamp-1; }
+  .rx-card__date      { @apply text-[11px] text-muted-foreground mt-2 flex items-center gap-1; }
+
+  /* ============================================================
+     NOTIFICATIONS PAGE
+     ============================================================ */
+
+  .notif-page__group-label {
+    @apply text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3;
+  }
+  .notif-page__item         { @apply flex items-start gap-4 p-5 transition-colors; }
+  .notif-page__item--unread { @apply bg-primary/5 border-l-2 border-l-primary; }
+  .notif-page__item--read   { @apply hover:bg-muted/40; }
+  .notif-page__item-icon    {
+    @apply h-10 w-10 rounded-full flex items-center justify-center shrink-0 mt-0.5;
+  }
+  .notif-page__item-title { @apply text-base font-semibold text-foreground; }
+  .notif-page__item-msg   { @apply text-sm text-muted-foreground mt-1 leading-relaxed; }
+  .notif-page__item-time  { @apply text-xs text-muted-foreground; }
+  .notif-page__dismiss-btn {
+    @apply h-8 w-8 rounded-md opacity-0 hover:bg-destructive/10;
+    @apply flex items-center justify-center transition-all;
+    :where(.group):hover & { @apply opacity-100; }
+  }
+
+  /* ============================================================
+     RESERVATIONS PAGE
+     ============================================================ */
+
+  .reservation-card__header {
+    @apply flex items-center gap-2 mb-2;
+  }
+  .reservation-card__pharmacy {
+    @apply text-base font-bold text-foreground truncate;
+    :where(.group):hover & { @apply text-primary; }
+  }
+  .reservation-card__counts {
+    @apply flex items-center justify-between text-sm text-muted-foreground mb-2;
+  }
+  .reservation-card__times {
+    @apply flex items-center justify-between text-xs text-muted-foreground;
+  }
+
+  /* ============================================================
+     AI ASSISTANT
+     ============================================================ */
+
+  .ai-chat-layout   {
+    @apply flex flex-col gap-0;
+    margin: -1.5rem;
+    width: calc(100% + 3rem);
+    height: calc(100% + 3rem);
+  }
+  .ai-chat-sidebar  { @apply w-64 border-r bg-muted/20 flex flex-col shrink-0 hidden md:flex; }
+  .ai-chat-sidebar__header { @apply p-3 border-b; }
+  .ai-chat-sidebar__list   { @apply flex-1 overflow-y-auto p-2 space-y-0.5; }
+  .ai-conv-btn         { @apply w-full text-left px-3 py-2.5 rounded-lg text-xs transition-colors; }
+  .ai-conv-btn--active { @apply bg-primary/10 text-primary font-semibold; }
+  .ai-conv-btn--idle   { @apply text-muted-foreground hover:bg-muted hover:text-foreground; }
+  .ai-chat-area        { @apply flex-1 flex flex-col min-w-0; }
+  .ai-chat-area__msgs  { @apply flex-1 overflow-y-auto p-4 sm:p-6 space-y-4; }
+  .ai-bubble           { @apply max-w-[80%] rounded-2xl px-4 py-3; }
+  .ai-bubble--user     { @apply bg-primary text-primary-foreground rounded-br-md; }
+  .ai-bubble--ai       { @apply bg-muted text-foreground rounded-bl-md; }
+  .ai-bubble__sender   { @apply flex items-center gap-1.5 mb-1; }
+  .ai-bubble__text     { @apply text-sm leading-relaxed whitespace-pre-line; }
+  .ai-bubble__time     { @apply text-[10px] mt-1.5 opacity-50; }
+  .ai-input-area       { @apply border-t p-4 bg-background; }
+  .ai-input-row        { @apply flex gap-2 items-end; }
+  .ai-quick-prompts    { @apply flex gap-2 mt-2; }
+
+  /* ============================================================
+     SHARED ANIMATION UTILITIES
+     ============================================================ */
+
+  .bounce-delay-1 { animation-delay: 0.15s; }
+  .bounce-delay-2 { animation-delay: 0.3s; }
 }

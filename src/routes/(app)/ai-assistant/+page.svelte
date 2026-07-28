@@ -1,1 +1,1 @@
-<h1>AI Symptom Checker & Assistant</h1>
+<h1>AI Assistant</h1>
