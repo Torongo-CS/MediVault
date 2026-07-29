@@ -4,14 +4,25 @@ import { v } from "convex/values";
 export default defineSchema({
   // 1. USERS TABLE (Admins, Pharmacists, Customers)
   users: defineTable({
+    name: v.string(),
     role: v.union(v.literal("admin"), v.literal("pharmacist"), v.literal("customer")),
-    email: v.string(),
-    passwordHash: v.string(),
+    email: v.string(), // Always stored trimmed + lowercased so the index lookup is exact
+    passwordHash: v.string(), // Format: pbkdf2$<iterations>$<saltB64>$<hashB64> — never leaves the backend
     imageUrl: v.optional(v.string()),
     isActive: v.boolean(),
   })
   .index("by_email", ["email"])
   .index("by_role", ["role"]),
+
+  // 1b. SESSIONS TABLE (Backs the httpOnly cookie issued by the SvelteKit server)
+  sessions: defineTable({
+    token: v.string(),
+    userId: v.id("users"),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  })
+  .index("by_token", ["token"])
+  .index("by_user", ["userId"]),
 
   // 2. MEDICINE TABLE
   medicines: defineTable({

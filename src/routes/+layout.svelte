@@ -4,12 +4,9 @@
   import { ModeWatcher } from "mode-watcher";
   import * as Sidebar from "$lib/components/ui/sidebar";
   import AppSidebar from "$lib/components/app-sidebar.svelte";
-  import { afterNavigate } from '$app/navigation';
   import { onMount } from 'svelte';
 
-  let { children } = $props();
-
-  let currentPath = $state("");
+  let { data, children } = $props();
 
   // Theme states
   let activeTheme = $state("theme-1"); 
@@ -63,24 +60,10 @@
     }
   });
 
-  // Seed the initial path right away when the app boots up
-  onMount(() => {
-    currentPath = window.location.pathname;
-  });
-
-  afterNavigate((nav) => {
-    if (nav.to) {
-      currentPath = nav.to.url.pathname;
-    }
-  });
-
-  // Helper derived state to check if the user is on a auth page
-  let isAuthPage = $derived(
-    currentPath === '/login' || 
-    currentPath === '/register' || 
-    currentPath === '/' || 
-    currentPath === '/forgot-password'
-  );
+  // The app shell follows the session, not the URL: signed-out visitors (landing,
+  // about, login, register, forgot-password) get the bare canvas, everyone else
+  // gets the sidebar workspace.
+  let showAppShell = $derived(data.user !== null);
 </script>
 
 <svelte:window onkeydown={handleThemeShortcut} />
@@ -93,7 +76,7 @@
 
 
 
-{#if isAuthPage}
+{#if !showAppShell}
   <main class="w-screen h-screen relative overflow-hidden">
     {@render children()}
   </main>
