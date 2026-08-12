@@ -4,12 +4,14 @@ import { v } from "convex/values";
 export default defineSchema({
   // 1. USERS TABLE (Admins, Pharmacists, Customers)
   users: defineTable({
-    name: v.string(),
+    name: v.optional(v.string()),
     role: v.union(v.literal("admin"), v.literal("pharmacist"), v.literal("customer")),
     email: v.string(), // Always stored trimmed + lowercased so the index lookup is exact
-    passwordHash: v.string(), // Format: pbkdf2$<iterations>$<saltB64>$<hashB64> — never leaves the backend
+    phone: v.optional(v.string()),
+    passwordHash: v.optional(v.string()), // Format: pbkdf2$<iterations>$<saltB64>$<hashB64> — never leaves the backend
     imageUrl: v.optional(v.string()),
     isActive: v.boolean(),
+    createdAt: v.optional(v.number()),
   })
   .index("by_email", ["email"])
   .index("by_role", ["role"]),

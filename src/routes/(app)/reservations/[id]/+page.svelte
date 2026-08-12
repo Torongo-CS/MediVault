@@ -29,7 +29,7 @@
     pharmacyName: "HealthPlus Pharmacy",
     pharmacyAddress: "42 Mirpur Road, Dhaka 1205",
     pharmacyPhone: "+880 1712-345678",
-    status: "approved" as const,
+    status: "approved" as "pending" | "approved" | "rejected" | "expired" | "ready" | "delivered" | "cancelled",
     requestDate: Date.now() - 24 * 60 * 60 * 1000,
     pickupDate: Date.now() + 12 * 60 * 60 * 1000,
     totalAmount: 45.5,

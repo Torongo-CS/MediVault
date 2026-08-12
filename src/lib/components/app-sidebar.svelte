@@ -18,9 +18,7 @@
     Package,
     LogOut,
     Shield,
-
     Bell
-
   } from "lucide-svelte";
 
   const menuConfig = {
@@ -64,35 +62,27 @@
     }
   };
 
-  const currentMenu = $derived(menuConfig[userSession.role]);
+  const currentMenu = $derived(menuConfig[userSession.role] ?? menuConfig.customer);
 </script>
 
 <Sidebar.Root collapsible="icon">
-  <Sidebar.Header class="p-4 border-b space-y-4">
-    <div class="flex items-center gap-3">
-      <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black text-lg">
+  <Sidebar.Header class="p-3 border-b flex flex-row items-center justify-between">
+    <div class="flex items-center gap-2 min-w-0">
+      <div class="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-black text-lg shrink-0">
         M
       </div>
-      <div class="flex flex-col">
-        <span class="font-bold text-sm leading-none">MediVault</span>
-        <span class="text-[10px] text-muted-foreground mt-0.5">Workspace Management</span>
-      </div>
-    </div>
-
-    <div class="w-full flex items-center gap-2 px-3 py-2 rounded-md border bg-muted/50">
-      <Shield class="w-3.5 h-3.5 text-primary shrink-0" />
-      <div class="flex flex-col min-w-0">
-        <span class="text-xs font-semibold truncate">{userSession.name || "Signed in"}</span>
-        <span class="text-[10px] text-muted-foreground truncate">
-          {userSession.email}{userSession.email ? " · " : ""}<span class="capitalize">{userSession.role}</span>
-        </span>
+      <div class="flex flex-col min-w-0 group-data-[collapsible=icon]:hidden">
+        <span class="font-bold text-sm leading-none truncate">MediVault</span>
+        <span class="text-[10px] text-muted-foreground mt-0.5 truncate">Workspace Management</span>
       </div>
     </div>
   </Sidebar.Header>
 
   <Sidebar.Content>
     <Sidebar.Group>
-      <Sidebar.GroupLabel class="text-xs uppercase tracking-wider font-semibold text-muted-foreground">{currentMenu.label}</Sidebar.GroupLabel>
+      <Sidebar.GroupLabel class="text-xs uppercase tracking-wider font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">
+        {currentMenu.label}
+      </Sidebar.GroupLabel>
       <Sidebar.GroupContent>
         <Sidebar.Menu>
           {#each currentMenu.items as item (item.title)}
@@ -112,15 +102,17 @@
     </Sidebar.Group>
   </Sidebar.Content>
 
-  <Sidebar.Footer class="p-4 flex justify-between items-center flex-row border-t bg-muted/20">
-    <ThemeToggle />
+  <Sidebar.Footer class="p-3 flex justify-between items-center flex-row border-t bg-muted/20">
+    <div class="group-data-[collapsible=icon]:hidden">
+      <ThemeToggle />
+    </div>
     <form method="POST" action="/logout" class="contents">
       <Sidebar.MenuItem class="list-none">
         <Sidebar.MenuButton class="w-fit hover:bg-destructive/10">
           {#snippet child({ props })}
             <button type="submit" {...props} class="flex items-center text-destructive font-semibold">
-              <LogOut class="w-4 h-4 mr-2" />
-              <span>Logout</span>
+              <LogOut class="w-4 h-4 mr-2 group-data-[collapsible=icon]:mr-0" />
+              <span class="group-data-[collapsible=icon]:hidden">Logout</span>
             </button>
           {/snippet}
         </Sidebar.MenuButton>

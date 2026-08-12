@@ -1,5 +1,5 @@
 import { v, ConvexError } from "convex/values";
-import { internalAction, internalMutation } from "./_generated/server";
+import { action, internalAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { hashPassword, normalizeEmail } from "./auth";
@@ -26,8 +26,9 @@ export const createAdmin = internalAction({
   },
   returns: v.object({ userId: v.id("users"), created: v.boolean() }),
   handler: async (ctx, args): Promise<{ userId: Id<"users">; created: boolean }> => {
-    const email = normalizeEmail(args.email ?? process.env.ADMIN_EMAIL ?? "");
-    const password = args.password ?? process.env.ADMIN_PASSWORD ?? "";
+    const procEnv = (globalThis as Record<string, any>).process?.env ?? {};
+    const email = normalizeEmail(args.email ?? procEnv.ADMIN_EMAIL ?? "");
+    const password = args.password ?? procEnv.ADMIN_PASSWORD ?? "";
     const name = args.name ?? "MediVault Admin";
 
     if (email.length === 0) {
@@ -80,5 +81,46 @@ export const upsertAdmin = internalMutation({
       isActive: true,
     });
     return { userId, created: true };
+  },
+});
+
+/**
+ * Seed all test accounts: Customer, Pharmacist, and Admin
+ */
+export const seedAll = action({
+  args: {},
+  handler: async (ctx) => {
+    const dummyUsers = [
+      {
+        name: "Jane Customer",
+        email: "customer@medivault.com",
+        password: "password123",
+        role: "customer" as const,
+      },
+      {
+        name: "Dr. Alex Pharmacist",
+        email: "pharmacist@medivault.com",
+        password: "password123",
+        role: "pharmacist" as const,
+      },
+      {
+        name: "System Admin",
+        email: "admin@medivault.com",
+        password: "password123",
+        role: "admin" as const,
+      },
+    ];
+
+    for (const u of dummyUsers) {
+      const passwordHash = await hashPassword(u.password);
+      await ctx.runMutation(internal.auth.upsertUser, {
+        name: u.name,
+        email: u.email,
+        passwordHash,
+        role: u.role,
+      });
+    }
+
+    return "Successfully seeded customer@medivault.com, pharmacist@medivault.com, and admin@medivault.com (password: password123)";
   },
 });

@@ -5,7 +5,7 @@
   import { PackageOpen } from "lucide-svelte";
 
   interface Props {
-    icon?: Component;
+    icon?: any;
     headline?: string;
     description?: string;
     ctaLabel?: string;

@@ -54,7 +54,7 @@ const KEY_BITS = 256;
 function toPublicUser(user: Doc<"users">): PublicUser {
   return {
     _id: user._id,
-    name: user.name,
+    name: user.name ?? "User",
     email: user.email,
     role: user.role,
     imageUrl: user.imageUrl,
@@ -156,7 +156,7 @@ export const getUserByEmail = internalQuery({
     return await ctx.db
       .query("users")
       .withIndex("by_email", (q) => q.eq("email", args.email))
-      .unique();
+      .first();
   },
 });
 
@@ -177,6 +177,40 @@ export const createUser = internalMutation({
       .unique();
     if (existing !== null) {
       throw new ConvexError({ code: "EMAIL_TAKEN" });
+    }
+
+    return await ctx.db.insert("users", {
+      name: args.name,
+      email: args.email,
+      passwordHash: args.passwordHash,
+      role: args.role,
+      isActive: true,
+    });
+  },
+});
+
+export const upsertUser = internalMutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    passwordHash: v.string(),
+    role: v.union(v.literal("admin"), v.literal("pharmacist"), v.literal("customer")),
+  },
+  returns: v.id("users"),
+  handler: async (ctx, args): Promise<Id<"users">> => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .first();
+
+    if (existing !== null) {
+      await ctx.db.patch(existing._id, {
+        name: args.name,
+        passwordHash: args.passwordHash,
+        role: args.role,
+        isActive: true,
+      });
+      return existing._id;
     }
 
     return await ctx.db.insert("users", {
@@ -270,6 +304,10 @@ export const signIn = action({
       await verifyPassword(args.password, `pbkdf2$${PBKDF2_ITERATIONS}$${toBase64(
         new Uint8Array(SALT_BYTES),
       )}$${toBase64(new Uint8Array(KEY_BITS / 8))}`);
+      throw new ConvexError({ code: "INVALID_CREDENTIALS" });
+    }
+
+    if (!user.passwordHash) {
       throw new ConvexError({ code: "INVALID_CREDENTIALS" });
     }
 

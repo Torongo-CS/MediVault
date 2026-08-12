@@ -2,6 +2,7 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
   import * as Popover from "$lib/components/ui/popover";
+  import * as Sidebar from "$lib/components/ui/sidebar";
   import { ShoppingCart, Bell, Package, CheckCircle2, Clock, ChevronRight } from "lucide-svelte";
   import { cart } from "$lib/stores/cartStore.svelte";
   import { page } from "$app/state";
@@ -54,7 +55,8 @@
 </script>
 
 <header class="topbar">
-  <div>
+  <div class="flex items-center gap-3">
+    <Sidebar.Trigger class="h-8 w-8" />
     <h2 class="topbar__title">{pageTitle()}</h2>
   </div>
 

@@ -18,7 +18,7 @@
     Shield,
   } from "lucide-svelte";
 
-  const pharmacyId = $derived(page.params.pharmacyID);
+  const pharmacyId = $derived(page.params.pharmacyID ?? "");
 
   // Mock pharmacy data — will be replaced with Convex query
   const pharmacy = $derived({
@@ -271,7 +271,7 @@
           requiresPrescription={med.requiresPrescription}
           symptoms={med.symptoms}
           pharmacyId={pharmacyId}
-          pharmacyName={pharmacy.name}
+          pharmacyName={pharmacy?.name ?? "Pharmacy"}
           detailHref="/pharmacy/{pharmacyId}/{med.medicineId}"
         />
       {/each}
