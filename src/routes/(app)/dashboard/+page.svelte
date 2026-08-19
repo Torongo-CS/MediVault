@@ -47,131 +47,184 @@
   ];
 </script>
 
-<div class="page-root">
-  <!-- Welcome Banner -->
-  <Card.Root class="welcome-banner">
-    <div class="welcome-banner__content">
-      <p class="welcome-banner__date">{today}</p>
-      <h1 class="welcome-banner__greeting">{getGreeting()}, {userName}! 👋</h1>
-      <p class="welcome-banner__subtitle">Welcome back to MediVault. Here's your overview.</p>
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title flex items-center gap-2">
+        {getGreeting()}, {userName}! 👋
+      </h1>
+      <p class="text-xs text-muted-foreground mt-1">
+        {today} &bull; Welcome back to MediVault. Here is your health overview.
+      </p>
     </div>
-    <div class="absolute right-0 bottom-0 opacity-5 pointer-events-none">
-      <Sparkles class="h-40 w-40 text-primary" />
+    <div class="flex items-center gap-3">
+      <Button href="/pharmacy" variant="default" class="gap-2">
+        <Pill class="h-4 w-4" /> Find Pharmacy
+      </Button>
     </div>
-  </Card.Root>
+  </div>
 
-  <!-- Stat Cards -->
-  <div class="stat-cards-grid">
-    <a href="/reservations">
-      <Card.Root class="p-5 card-interactive hover:border-primary/20">
-        <div class="stat-card__inner">
-          <div>
-            <p class="stat-card__value">{stats.activeReservations}</p>
-            <p class="stat-card__label">Active Reservations</p>
-          </div>
-          <div class="icon-box bg-blue-500/10">
-            <CalendarCheck class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          </div>
-        </div>
+  <!-- Key Metrics Cards Grid -->
+  <div class="dashboard-grid">
+    <a href="/reservations" class="block">
+      <Card.Root class="hover:border-primary/50 transition-colors cursor-pointer h-full">
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="dashboard-card-title">Active Reservations</Card.Title>
+          <CalendarCheck class="dashboard-card-icon text-blue-500" />
+        </Card.Header>
+        <Card.Content>
+          <div class="dashboard-card-value">{stats.activeReservations}</div>
+          <p class="text-xs text-muted-foreground mt-1">Orders in progress</p>
+        </Card.Content>
       </Card.Root>
     </a>
 
-    <a href="/reservations">
-      <Card.Root class="p-5 card-interactive hover:border-amber-500/20">
-        <div class="stat-card__inner">
-          <div>
-            <p class="stat-card__value">{stats.pendingApprovals}</p>
-            <p class="stat-card__label">Pending Approval</p>
-          </div>
-          <div class="icon-box bg-amber-500/10 relative">
-            <Clock class="h-6 w-6 text-amber-600 dark:text-amber-400" />
-            <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-amber-500 animate-pulse"></span>
-          </div>
-        </div>
+    <a href="/reservations" class="block">
+      <Card.Root class="hover:border-amber-500/50 transition-colors cursor-pointer h-full">
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="dashboard-card-title">Pending Approvals</Card.Title>
+          <Clock class="dashboard-card-icon text-amber-500" />
+        </Card.Header>
+        <Card.Content>
+          <div class="dashboard-card-value">{stats.pendingApprovals}</div>
+          <p class="text-xs text-muted-foreground mt-1">Awaiting pharmacy confirmation</p>
+        </Card.Content>
       </Card.Root>
     </a>
 
-    <a href="/prescriptions">
-      <Card.Root class="p-5 card-interactive hover:border-primary/20">
-        <div class="stat-card__inner">
-          <div>
-            <p class="stat-card__value">{stats.prescriptionsUploaded}</p>
-            <p class="stat-card__label">Prescriptions in Vault</p>
-          </div>
-          <div class="icon-box bg-emerald-500/10">
-            <FileText class="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-          </div>
-        </div>
+    <a href="/prescriptions" class="block">
+      <Card.Root class="hover:border-emerald-500/50 transition-colors cursor-pointer h-full">
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="dashboard-card-title">Prescriptions in Vault</Card.Title>
+          <FileText class="dashboard-card-icon text-emerald-500" />
+        </Card.Header>
+        <Card.Content>
+          <div class="dashboard-card-value">{stats.prescriptionsUploaded}</div>
+          <p class="text-xs text-muted-foreground mt-1">Stored digital Rx files</p>
+        </Card.Content>
+      </Card.Root>
+    </a>
+
+    <a href="/favorites" class="block">
+      <Card.Root class="hover:border-rose-500/50 transition-colors cursor-pointer h-full">
+        <Card.Header class="flex flex-row items-center justify-between space-y-0 pb-2">
+          <Card.Title class="dashboard-card-title">Favorite Pharmacies</Card.Title>
+          <Heart class="dashboard-card-icon text-rose-500" />
+        </Card.Header>
+        <Card.Content>
+          <div class="dashboard-card-value">{favoritePharmacies.length}</div>
+          <p class="text-xs text-muted-foreground mt-1">Saved quick contacts</p>
+        </Card.Content>
       </Card.Root>
     </a>
   </div>
 
-  <!-- Two-column: Quick Actions + Notifications -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Quick Actions -->
-    <Card.Root class="p-6">
-      <h3 class="section-title text-base mb-5">Quick Actions</h3>
-      <div class="quick-actions-grid">
-        {#each quickActions as action}
-          <a href={action.href} class="quick-action-item group">
-            <div class="icon-box rounded-xl {action.color}">
-              <action.icon class="h-5 w-5" />
-            </div>
-            <span class="quick-action-item__label">{action.label}</span>
-          </a>
-        {/each}
-      </div>
-    </Card.Root>
+  <!-- Quick Action Navigation Shortcuts -->
+  <div class="flex items-center mt-8 mb-4">
+    <h2 class="text-xl font-semibold tracking-tight">Quick Actions</h2>
+  </div>
 
-    <!-- Recent Notifications -->
-    <Card.Root class="p-5">
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="section-title">Recent Notifications</h3>
-        <Button variant="ghost" size="sm" href="/notifications" class="text-xs text-muted-foreground gap-1">
-          View All <ChevronRight class="h-3 w-3" />
+  <div class="dashboard-grid">
+    <a href="/pharmacy" class="block group">
+      <Card.Root class="h-full hover:border-primary/50 hover:bg-muted/10 transition-colors cursor-pointer">
+        <Card.Header>
+          <Pill class="h-7 w-7 text-primary mb-2 group-hover:scale-110 transition-transform" />
+          <Card.Title>Search Pharmacy</Card.Title>
+          <Card.Description>Locate nearby pharmacies and check medicine availability.</Card.Description>
+        </Card.Header>
+      </Card.Root>
+    </a>
+
+    <a href="/ai-assistant" class="block group">
+      <Card.Root class="h-full hover:border-primary/50 hover:bg-muted/10 transition-colors cursor-pointer">
+        <Card.Header>
+          <Brain class="h-7 w-7 text-primary mb-2 group-hover:scale-110 transition-transform" />
+          <Card.Title>AI Assistant</Card.Title>
+          <Card.Description>Get instant guidance on medicines, dosage, & side effects.</Card.Description>
+        </Card.Header>
+      </Card.Root>
+    </a>
+
+    <a href="/prescriptions" class="block group">
+      <Card.Root class="h-full hover:border-primary/50 hover:bg-muted/10 transition-colors cursor-pointer">
+        <Card.Header>
+          <FileText class="h-7 w-7 text-primary mb-2 group-hover:scale-110 transition-transform" />
+          <Card.Title>Prescriptions Vault</Card.Title>
+          <Card.Description>Upload, store, and manage your medical prescriptions safely.</Card.Description>
+        </Card.Header>
+      </Card.Root>
+    </a>
+
+    <a href="/history" class="block group">
+      <Card.Root class="h-full hover:border-primary/50 hover:bg-muted/10 transition-colors cursor-pointer">
+        <Card.Header>
+          <History class="h-7 w-7 text-primary mb-2 group-hover:scale-110 transition-transform" />
+          <Card.Title>Order History</Card.Title>
+          <Card.Description>Review past medicine orders and request instant refills.</Card.Description>
+        </Card.Header>
+      </Card.Root>
+    </a>
+  </div>
+
+  <!-- Main Section: Notifications & Favorite Pharmacies -->
+  <div class="dashboard-section mt-8">
+    <!-- Left Column: Recent Notifications (4 Columns) -->
+    <Card.Root class="dashboard-chart-area">
+      <Card.Header class="flex flex-row items-center justify-between">
+        <div>
+          <Card.Title>Recent Notifications</Card.Title>
+          <Card.Description>Stay updated on order status and health reminders.</Card.Description>
+        </div>
+        <Button href="/notifications" variant="outline" size="sm" class="gap-1 text-xs">
+          View All <ChevronRight class="h-3.5 w-3.5" />
         </Button>
-      </div>
-      <div class="space-y-2.5">
+      </Card.Header>
+      <Card.Content class="space-y-3">
         {#each notifications as notif (notif.id)}
-          <div class="dash-notif-item {notif.unread ? 'dash-notif-item--unread' : 'dash-notif-item--read'}">
-            <div class="dash-notif-item__icon">
-              <Bell class="h-3.5 w-3.5 text-muted-foreground" />
+          <div class="flex items-start gap-3 p-3 rounded-lg border border-border/60 {notif.unread ? 'bg-primary/5 border-primary/20' : 'bg-card'} transition-colors">
+            <div class="p-2 rounded-full bg-muted flex-shrink-0 mt-0.5">
+              <Bell class="h-4 w-4 text-primary" />
             </div>
             <div class="flex-1 min-w-0">
-              <p class="dash-notif-item__title">{notif.title}</p>
-              <p class="dash-notif-item__msg">{notif.message}</p>
+              <div class="flex items-center justify-between">
+                <p class="font-semibold text-sm text-foreground">{notif.title}</p>
+                <span class="text-xs text-muted-foreground">{notif.time}</span>
+              </div>
+              <p class="text-xs text-muted-foreground mt-0.5">{notif.message}</p>
             </div>
-            <span class="dash-notif-item__time">{notif.time}</span>
           </div>
         {/each}
-      </div>
+      </Card.Content>
     </Card.Root>
-  </div>
 
-  <!-- Favorite Pharmacies -->
-  {#if favoritePharmacies.length > 0}
-    <div>
-      <div class="flex items-center justify-between mb-4">
-        <h3 class="section-title flex items-center gap-2">
-          <Heart class="h-4 w-4 text-red-500" />
-          Favorite Pharmacies
-        </h3>
-        <a href="/favorites" class="text-xs font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-          View All <ArrowRight class="h-3 w-3" />
-        </a>
-      </div>
-      <div class="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
-        {#each favoritePharmacies as pharm (pharm.id)}
-          <PharmacyCard
-            id={pharm.id}
-            name={pharm.name}
-            address={pharm.address}
-            phone={pharm.phone}
-            isFavorite={true}
-            compact
-          />
-        {/each}
-      </div>
+    <!-- Right Column: Favorite Pharmacies (3 Columns) -->
+    <div class="dashboard-recent-area space-y-6">
+      <Card.Root class="h-full flex flex-col justify-between">
+        <Card.Header class="flex flex-row items-center justify-between">
+          <div>
+            <Card.Title class="flex items-center gap-2">
+              <Heart class="h-4 w-4 text-rose-500" /> Favorite Pharmacies
+            </Card.Title>
+            <Card.Description>Quick access to your preferred pharmacies</Card.Description>
+          </div>
+          <Button href="/favorites" variant="ghost" size="sm" class="text-xs text-muted-foreground gap-1">
+            View All <ArrowRight class="h-3 w-3" />
+          </Button>
+        </Card.Header>
+        <Card.Content class="space-y-3 flex-1">
+          {#each favoritePharmacies as pharm (pharm.id)}
+            <PharmacyCard
+              id={pharm.id}
+              name={pharm.name}
+              address={pharm.address}
+              phone={pharm.phone}
+              isFavorite={true}
+              compact
+            />
+          {/each}
+        </Card.Content>
+      </Card.Root>
     </div>
-  {/if}
+  </div>
 </div>

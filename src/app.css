@@ -37,344 +37,337 @@
 
 @layer base {
   /* ========================================================
-     THEME 1: DEFAULT / VIBRANT ORANGE (Alt + 1)
+     THEME 1: VITAL TEAL (Alt + 1)
      ======================================================== */
   :root, [data-theme="theme-1"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 0 0% 9%;
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --background: 180 30% 97%;       /* Ice Mint Teal (#f0fdfa) */
+    --foreground: 190 85% 11%;     /* Deep Vital Ocean Teal Text (#042f2e) */
+    --card: 0 0% 100%;              /* High-Clarity Pure White Card (#ffffff) */
+    --card-foreground: 190 85% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
-    --primary: 24 98% 56%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 210 25% 95%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 210 20% 95%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 190 85% 95%;
-    --accent-foreground: 190 80% 20%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 24 98% 56%;
+    --popover-foreground: 190 85% 11%;
+    --primary: 174 95% 32%;        /* Striking Vital Teal Primary (#0c8c80 / #0d9488) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 172 65% 92%;      /* Vibrant Mint-Teal Tint (#ccfbf1) */
+    --secondary-foreground: 175 90% 16%;
+    --muted: 180 25% 94%;           /* Soft Ice Slate Muted (#e6f4f2) */
+    --muted-foreground: 185 25% 40%;/* Vital Muted Teal Gray (#3b706c) */
+    --accent: 172 70% 88%;          /* Soft Vital Mint Glow (#99f6e4) */
+    --accent-foreground: 175 90% 16%;
+    --destructive: 0 84% 60%;      /* Vital Crimson Red (#ef4444) */
+    --destructive-foreground: 0 0% 100%;
+    --border: 174 35% 86%;          /* Vital Teal Border (#bfe5e1) */
+    --input: 174 35% 86%;
+    --ring: 174 95% 32%;
     --radius: 0.3rem;
   }
-  /* Theme 1 Dark Mode Variant */
   .dark, [data-theme="theme-1"].dark, &:is(.dark [data-theme="theme-1"] *) {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 24 98% 58%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 220 8% 14%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 220 8% 14%;
-    --muted-foreground: 220 10% 72%;
-    --accent: 190 70% 35%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 24 98% 58%;
+    --background: 190 80% 6%;      /* Deep Oceanic Vital Dark (#021818) */
+    --foreground: 170 50% 95%;     /* Crisp Vital Ice Teal Text (#f0fdfa) */
+    --card: 190 65% 10%;           /* Elevated Cyber Vital Teal Card (#072a29) */
+    --card-foreground: 170 50% 95%;
+    --popover: 190 80% 6%;
+    --popover-foreground: 170 50% 95%;
+    --primary: 172 95% 42%;        /* Electric Vital Teal Neon (#14b8a6) */
+    --primary-foreground: 190 90% 5%;/* Ultra Contrast Dark Teal (#011212) */
+    --secondary: 190 55% 15%;      /* Deep Vital Slate Teal (#0c3d3b) */
+    --secondary-foreground: 170 50% 95%;
+    --muted: 190 50% 13%;          /* Dark Vital Teal Muted (#093331) */
+    --muted-foreground: 175 30% 68%;/* Bright Vital Ice Muted (#6baca7) */
+    --accent: 172 70% 16%;         /* Vital Teal Glow Tint (#0a403c) */
+    --accent-foreground: 172 90% 85%;
+    --destructive: 0 90% 68%;     /* Electric Crimson (#f87171) */
+    --destructive-foreground: 190 90% 5%;
+    --border: 174 50% 18%;         /* Electric Vital Teal Border (#0e4b47) */
+    --input: 174 50% 18%;
+    --ring: 172 95% 42%;
   }
 
   /* ========================================================
-     THEME 2: BLACK & GOLD ELEGANCE (Alt + 2)
+     THEME 2: VITAL CYAN (Alt + 2)
      ======================================================== */
   [data-theme="theme-2"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 220 40% 6%;
-    --card: 220 25% 97%;
-    --card-foreground: 220 40% 6%;
+    --background: 200 45% 97%;       /* Ice Sapphire Tint (#f0f9ff) */
+    --foreground: 222 47% 11%;     /* Deep Navy Text (#0f172a) */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 40% 6%;
-    --primary: 43 80% 56%;         /* Regal Gold */
-    --primary-foreground: 220 40% 6%;
-    --secondary: 220 20% 95%;
-    --secondary-foreground: 43 70% 30%;
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 40%;
-    --accent: 43 60% 92%;
-    --accent-foreground: 43 80% 25%;
-    --destructive: 0 80% 45%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 43 80% 56%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 198 90% 40%;        /* Vibrant Cyber Cyan (#0284c7) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 199 89% 93%;      /* Ice Sky Blue Tint (#e0f2fe) */
+    --secondary-foreground: 198 90% 25%;
+    --muted: 205 30% 95%;
+    --muted-foreground: 215 20% 45%;
+    --accent: 199 85% 88%;         /* Soft Sky Cyan Glow (#bae6fd) */
+    --accent-foreground: 198 90% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 35% 88%;
+    --input: 200 35% 88%;
+    --ring: 198 90% 40%;
   }
-  /* Theme 2 Dark Mode Variant (True Deep Velvet Black & Bright Gold) */
   [data-theme="theme-2"].dark, &:is(.dark [data-theme="theme-2"] *) {
-    --background: 220 40% 4%;      
-    --foreground: 43 50% 96%;      
-    --card: 220 35% 8%;
-    --card-foreground: 43 50% 96%;
-    --popover: 220 40% 4%;
-    --popover-foreground: 43 50% 96%;
-    --primary: 43 90% 52%;         
-    --primary-foreground: 220 40% 4%;
-    --secondary: 220 30% 12%;      
-    --secondary-foreground: 43 80% 85%;
-    --muted: 220 20% 14%;
-    --muted-foreground: 220 15% 60%;
-    --accent: 43 70% 12%;          
-    --accent-foreground: 43 90% 65%;
-    --border: 220 20% 14%;
-    --input: 220 20% 14%;
-    --ring: 43 90% 52%;
+    --background: 220 55% 7%;      /* Deep Cyber Obsidian Navy (#070f1e) */
+    --foreground: 210 40% 98%;     /* Crisp Ice Text (#f8fafc) */
+    --card: 222 47% 13%;           /* Elevated Cyber Sapphire Card (#0f172a) */
+    --card-foreground: 210 40% 98%;
+    --popover: 220 55% 7%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 198 95% 48%;        /* Electric Neon Sky Cyan (#38bdf8) */
+    --primary-foreground: 220 55% 6%;
+    --secondary: 200 45% 16%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 220 40% 15%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 198 60% 18%;
+    --accent-foreground: 198 80% 88%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 198 95% 48%;
   }
 
   /* ========================================================
-     THEME 3: FIERY SUNSET (Alt + 3)
+     THEME 3: VITAL EMERALD (Alt + 3)
      ======================================================== */
   [data-theme="theme-3"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 345 30% 15%;
-    --card: 345 25% 97%;
-    --card-foreground: 345 30% 15%;
+    --background: 160 40% 97%;       /* Ice Mint Tint (#ecfdf5) */
+    --foreground: 165 80% 10%;     /* Deep Bio Emerald Text (#022c22) */
+    --card: 0 0% 100%;
+    --card-foreground: 165 80% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 345 30% 15%;
-    --primary: 12 90% 52%;         /* Molten Red-Orange */
+    --popover-foreground: 165 80% 10%;
+    --primary: 160 84% 36%;        /* Vibrant Bio Emerald (#059669) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 350 30% 95%;
-    --secondary-foreground: 25 90% 30%;
-    --muted: 345 15% 92%;
-    --muted-foreground: 25 15% 45%;
-    --accent: 32 95% 92%;          /* Amber Tint */
-    --accent-foreground: 32 95% 35%;
-    --destructive: 0 80% 45%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 345 15% 88%;
-    --input: 345 15% 88%;
-    --ring: 12 90% 52%;
+    --secondary: 160 70% 92%;      /* Soft Bio Mint Tint (#d1fae5) */
+    --secondary-foreground: 160 84% 18%;
+    --muted: 160 25% 94%;
+    --muted-foreground: 165 25% 38%;
+    --accent: 160 75% 86%;         /* Soft Bio Mint Glow (#a7f3d0) */
+    --accent-foreground: 160 84% 18%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 160 35% 86%;
+    --input: 160 35% 86%;
+    --ring: 160 84% 36%;
   }
-  /* Theme 3 Dark Mode Variant (Obsidian Burgundy Smoke) */
   [data-theme="theme-3"].dark, &:is(.dark [data-theme="theme-3"] *) {
-    --background: 345 40% 7%;      
-    --foreground: 25 95% 98%;
-    --card: 345 35% 11%;
-    --card-foreground: 25 95% 98%;
-    --popover: 345 40% 7%;
-    --popover-foreground: 25 95% 98%;
-    --primary: 12 95% 48%;         
-    --primary-foreground: 0 0% 100%;
-    --secondary: 350 45% 14%;
-    --secondary-foreground: 25 95% 85%;
-    --muted: 345 25% 12%;
-    --muted-foreground: 25 15% 60%;
-    --accent: 28 95% 40%;          
-    --accent-foreground: 0 0% 100%;
-    --border: 345 25% 15%;
-    --input: 345 25% 15%;
-    --ring: 12 95% 48%;
+    --background: 160 60% 6%;      /* Deep Cyber Obsidian Emerald (#021912) */
+    --foreground: 160 50% 95%;     /* Crisp Bio Ice Text (#ecfdf5) */
+    --card: 160 50% 10%;           /* Elevated Cyber Emerald Card (#062d23) */
+    --card-foreground: 160 50% 95%;
+    --popover: 160 60% 6%;
+    --popover-foreground: 160 50% 95%;
+    --primary: 160 84% 45%;        /* Electric Neon Emerald (#10b981) */
+    --primary-foreground: 160 60% 5%;
+    --secondary: 160 45% 15%;
+    --secondary-foreground: 160 50% 95%;
+    --muted: 160 40% 13%;
+    --muted-foreground: 160 30% 68%;
+    --accent: 160 60% 16%;
+    --accent-foreground: 160 80% 85%;
+    --border: 160 45% 18%;
+    --input: 160 45% 18%;
+    --ring: 160 84% 45%;
   }
 
   /* ========================================================
-     THEME 4: WHIMSICAL WINTER WONDERLAND (Alt + 4)
+     THEME 4: VITAL AMBER (Alt + 4)
      ======================================================== */
   [data-theme="theme-4"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 210 40% 15%;
-    --card: 210 30% 97%;             
-    --card-foreground: 210 40% 15%;
+    --background: 40 50% 97%;        /* Warm Solar Linen (#fffbe6) */
+    --foreground: 30 75% 12%;      /* Deep Solar Amber Text (#1f1305) */
+    --card: 0 0% 100%;
+    --card-foreground: 30 75% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 40% 15%;
-    --primary: 210 50% 55%;        /* Ethereal Snowy Blue */
+    --popover-foreground: 30 75% 12%;
+    --primary: 38 92% 45%;         /* Vibrant Medical Amber (#d97706) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 200 20% 93%;
-    --secondary-foreground: 210 40% 25%;
-    --muted: 210 15% 92%;
-    --muted-foreground: 210 15% 45%;
-    --accent: 16 90% 93%;          /* Snowy Peach */
-    --accent-foreground: 16 70% 35%;
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 210 20% 88%;
-    --input: 210 20% 88%;
-    --ring: 210 50% 55%;
+    --secondary: 40 80% 92%;       /* Solar Amber Tint (#fef3c7) */
+    --secondary-foreground: 35 90% 20%;
+    --muted: 40 30% 94%;
+    --muted-foreground: 35 25% 40%;
+    --accent: 40 85% 86%;          /* Soft Amber Glow (#fde68a) */
+    --accent-foreground: 35 90% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 40% 86%;
+    --input: 40 40% 86%;
+    --ring: 38 92% 45%;
   }
-  /* Theme 4 Dark Mode Variant (Glacial Midnight Frost) */
   [data-theme="theme-4"].dark, &:is(.dark [data-theme="theme-4"] *) {
-    --background: 210 35% 8%;      
-    --foreground: 210 25% 92%;
-    --card: 210 30% 12%;             
-    --card-foreground: 210 25% 92%;
-    --popover: 210 35% 8%;
-    --popover-foreground: 210 25% 92%;
-    --primary: 210 60% 48%;        
-    --primary-foreground: 0 0% 100%;
-    --secondary: 210 25% 16%;
-    --secondary-foreground: 210 20% 80%;
-    --muted: 210 20% 15%;
-    --muted-foreground: 210 10% 65%;
-    --accent: 16 40% 20%;          
-    --accent-foreground: 16 80% 85%;
-    --border: 210 25% 16%;
-    --input: 210 25% 16%;
-    --ring: 210 60% 48%;
+    --background: 30 50% 7%;       /* Deep Obsidian Amber Dark (#1b1207) */
+    --foreground: 40 60% 95%;      /* Crisp Solar White Text (#fffbe6) */
+    --card: 30 45% 12%;            /* Elevated Cyber Amber Card (#2c1d0c) */
+    --card-foreground: 40 60% 95%;
+    --popover: 30 50% 7%;
+    --popover-foreground: 40 60% 95%;
+    --primary: 40 95% 50%;         /* Electric Golden Amber Neon (#f59e0b) */
+    --primary-foreground: 30 50% 5%;
+    --secondary: 30 40% 18%;
+    --secondary-foreground: 40 60% 95%;
+    --muted: 30 35% 15%;
+    --muted-foreground: 38 30% 68%;
+    --accent: 38 50% 18%;
+    --accent-foreground: 40 85% 85%;
+    --border: 35 40% 20%;
+    --input: 35 40% 20%;
+    --ring: 40 95% 50%;
   }
 
   /* ========================================================
-     THEME 5: OCEAN BREEZE (Alt + 5)
+     THEME 5: VITAL CRIMSON (Alt + 5)
      ======================================================== */
   [data-theme="theme-5"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 205 60% 12%;
-    --card: 205 25% 97%;
-    --card-foreground: 205 60% 12%;
+    --background: 350 45% 98%;      /* Ice Rose Tint (#fff1f2) */
+    --foreground: 350 75% 12%;     /* Deep Crimson Slate Text (#1c050a) */
+    --card: 0 0% 100%;
+    --card-foreground: 350 75% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 205 60% 12%;
-    --primary: 205 85% 45%;        /* Gentle Deep Blue */
+    --popover-foreground: 350 75% 12%;
+    --primary: 350 85% 48%;        /* Vibrant Medical Crimson (#e11d48) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 205 30% 93%;
-    --secondary-foreground: 205 60% 20%;
-    --muted: 205 15% 90%;
-    --muted-foreground: 205 20% 45%;
-    --accent: 12 90% 92%;          /* Splash of Peachy Red */
-    --accent-foreground: 12 75% 35%;
-    --destructive: 0 75% 55%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 205 25% 88%;
-    --input: 205 25% 88%;
-    --ring: 205 85% 45%;
+    --secondary: 350 70% 94%;      /* Crimson Rose Tint (#ffe4e6) */
+    --secondary-foreground: 350 85% 22%;
+    --muted: 350 25% 95%;
+    --muted-foreground: 350 20% 42%;
+    --accent: 350 75% 88%;         /* Soft Crimson Glow (#fecdd3) */
+    --accent-foreground: 350 85% 22%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 350 35% 88%;
+    --input: 350 35% 88%;
+    --ring: 350 85% 48%;
   }
-  /* Theme 5 Dark Mode Variant (Stormy Ocean Horizon) */
   [data-theme="theme-5"].dark, &:is(.dark [data-theme="theme-5"] *) {
-    --background: 205 40% 7%;      
-    --foreground: 205 20% 94%;
-    --card: 205 35% 11%;
-    --card-foreground: 205 20% 94%;
-    --popover: 205 40% 7%;
-    --popover-foreground: 205 20% 94%;
-    --primary: 205 75% 52%;        
-    --primary-foreground: 0 0% 100%;
-    --secondary: 205 25% 15%;
-    --secondary-foreground: 205 20% 82%;
-    --muted: 205 20% 14%;
-    --muted-foreground: 205 10% 65%;
-    --accent: 12 50% 18%;          
-    --accent-foreground: 12 85% 85%;
-    --border: 205 25% 15%;
-    --input: 205 25% 15%;
-    --ring: 205 75% 52%;
+    --background: 350 55% 7%;      /* Deep Obsidian Crimson (#1c050a) */
+    --foreground: 350 50% 96%;     /* Crisp Rose White Text (#fff1f2) */
+    --card: 350 45% 12%;           /* Elevated Cyber Crimson Card (#2d0a12) */
+    --card-foreground: 350 50% 96%;
+    --popover: 350 55% 7%;
+    --popover-foreground: 350 50% 96%;
+    --primary: 350 90% 60%;        /* Electric Neon Crimson Rose (#f43f5e) */
+    --primary-foreground: 350 55% 5%;
+    --secondary: 350 40% 18%;
+    --secondary-foreground: 350 50% 96%;
+    --muted: 350 35% 15%;
+    --muted-foreground: 350 25% 68%;
+    --accent: 350 50% 18%;
+    --accent-foreground: 350 80% 85%;
+    --border: 350 40% 20%;
+    --input: 350 40% 20%;
+    --ring: 350 90% 60%;
   }
 
   /* ========================================================
-     THEME 6: DEEP OCEAN BLUE (Alt + 6)
+     THEME 6: VITAL VIOLET (Alt + 6)
      ======================================================== */
   [data-theme="theme-6"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 230 30% 14%;
-    --card: 230 25% 97%;
-    --card-foreground: 230 30% 14%;
+    --background: 260 45% 98%;      /* Ice Lavender Tint (#f5f3ff) */
+    --foreground: 260 75% 12%;     /* Deep Violet Slate Text (#0f0720) */
+    --card: 0 0% 100%;
+    --card-foreground: 260 75% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 230 30% 14%;
-    --primary: 175 75% 40%;        /* Cascading Blue-Green Teal */
-    --primary-foreground: 230 45% 7%;
-    --secondary: 245 25% 95%;      /* Deep Violet Tint */
-    --secondary-foreground: 175 40% 25%;
-    --muted: 230 15% 92%;
-    --muted-foreground: 230 10% 45%;
-    --accent: 250 40% 94%;
-    --accent-foreground: 175 60% 30%;
-    --destructive: 0 70% 40%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 230 20% 88%;
-    --input: 230 20% 88%;
-    --ring: 175 75% 40%;
+    --popover-foreground: 260 75% 12%;
+    --primary: 262 83% 53%;        /* Vibrant Medical Violet (#7c3aed) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 70% 94%;      /* Lavender Tint (#ede9fe) */
+    --secondary-foreground: 262 85% 25%;
+    --muted: 260 25% 95%;
+    --muted-foreground: 260 20% 45%;
+    --accent: 260 75% 88%;         /* Soft Lavender Glow (#ddd6fe) */
+    --accent-foreground: 262 85% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 260 35% 88%;
+    --input: 260 35% 88%;
+    --ring: 262 83% 53%;
   }
-  /* Theme 6 Dark Mode Variant (The Abyssal Trench) */
   [data-theme="theme-6"].dark, &:is(.dark [data-theme="theme-6"] *) {
-    --background: 230 50% 4%;      
-    --foreground: 175 50% 96%;
-    --card: 230 40% 8%;
-    --card-foreground: 175 50% 96%;
-    --popover: 230 50% 4%;
-    --popover-foreground: 175 50% 96%;
-    --primary: 175 85% 35%;        
-    --primary-foreground: 230 50% 4%;
-    --secondary: 245 35% 12%;      
-    --secondary-foreground: 175 50% 90%;
-    --muted: 230 25% 11%;
-    --muted-foreground: 230 10% 60%;
-    --accent: 250 50% 16%;
-    --accent-foreground: 175 70% 85%;
-    --border: 230 30% 12%;
-    --input: 230 30% 12%;
-    --ring: 175 85% 35%;
+    --background: 260 55% 8%;      /* Deep Cyber Obsidian Violet (#0f0720) */
+    --foreground: 260 50% 96%;     /* Crisp Lavender White Text (#f5f3ff) */
+    --card: 260 45% 13%;           /* Elevated Cyber Violet Card (#1a0d36) */
+    --card-foreground: 260 50% 96%;
+    --popover: 260 55% 8%;
+    --popover-foreground: 260 50% 96%;
+    --primary: 262 90% 65%;        /* Electric Neon Violet Purple (#a855f7) */
+    --primary-foreground: 260 55% 6%;
+    --secondary: 260 40% 18%;
+    --secondary-foreground: 260 50% 96%;
+    --muted: 260 35% 15%;
+    --muted-foreground: 260 25% 68%;
+    --accent: 262 50% 18%;
+    --accent-foreground: 262 80% 85%;
+    --border: 260 40% 20%;
+    --input: 260 40% 20%;
+    --ring: 262 90% 65%;
   }
 
   /* ========================================================
-     THEME 7: MONOCHROME BEACH (Alt + 7)
+     THEME 7: VITAL SLATE (Alt + 7)
      ======================================================== */
   [data-theme="theme-7"] {
-    --background: 0 0% 100%;       /* Pure White */
-    --foreground: 210 25% 15%;     
-    --card: 40 30% 97%;
-    --card-foreground: 210 25% 15%;
+    --background: 210 40% 98%;      /* Pure Ice Slate (#f8fafc) */
+    --foreground: 222 47% 11%;     /* Deep Slate Text (#0f172a) */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 25% 15%;
-    --primary: 210 20% 35%;        /* Slate Gray */
-    --primary-foreground: 40 30% 98%;
-    --secondary: 180 25% 94%;      /* Smooth Minimal Teal */
-    --secondary-foreground: 210 25% 20%;
-    --muted: 210 10% 92%;
-    --muted-foreground: 210 15% 45%;
-    --accent: 180 30% 95%;
-    --accent-foreground: 210 25% 25%;
-    --destructive: 0 75% 50%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 210 15% 88%;
-    --input: 210 15% 88%;
-    --ring: 210 20% 35%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 217 91% 55%;        /* Vibrant Clinical Slate Cobalt (#2563eb) */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214 80% 93%;      /* Ice Cobalt Tint (#dbeafe) */
+    --secondary-foreground: 220 85% 25%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 214 85% 88%;         /* Soft Cobalt Glow (#bfdbfe) */
+    --accent-foreground: 220 85% 25%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 55%;
   }
-  /* Theme 7 Dark Mode Variant (Midnight Stony Coast) */
   [data-theme="theme-7"].dark, &:is(.dark [data-theme="theme-7"] *) {
-    --background: 210 25% 10%;     
-    --foreground: 40 20% 94%;     
-    --card: 210 20% 14%;
-    --card-foreground: 40 20% 94%;
-    --popover: 210 25% 10%;
-    --popover-foreground: 40 20% 94%;
-    --primary: 210 15% 75%;        
-    --primary-foreground: 210 25% 10%;
-    --secondary: 180 20% 16%;      
-    --secondary-foreground: 40 20% 85%;
-    --muted: 210 15% 15%;
-    --muted-foreground: 210 10% 60%;
-    --accent: 180 20% 18%;
-    --accent-foreground: 40 20% 90%;
-    --border: 210 15% 18%;
-    --input: 210 15% 18%;
-    --ring: 210 15% 75%;
+    --background: 222 47% 9%;      /* Deep Cyber Platinum Dark (#090d16) */
+    --foreground: 210 40% 98%;     /* Crisp Slate Text (#f8fafc) */
+    --card: 222 45% 13%;           /* Elevated Cyber Slate Card (#0f172a) */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 95% 65%;        /* Electric Neon Cobalt Sapphire (#60a5fa) */
+    --primary-foreground: 222 47% 6%;
+    --secondary: 220 40% 18%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 35% 15%;
+    --muted-foreground: 215 20% 68%;
+    --accent: 217 50% 18%;
+    --accent-foreground: 217 80% 85%;
+    --border: 217 40% 20%;
+    --input: 217 40% 20%;
+    --ring: 217 95% 65%;
   }
 
   /* Universal Dark Preset Fallback */
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 24 98% 58%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 220 8% 14%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 220 8% 14%;
-    --muted-foreground: 220 10% 72%;
-    --accent: 190 70% 35%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 24 98% 58%;
+    --background: 190 80% 6%;
+    --foreground: 170 50% 95%;
+    --card: 190 65% 10%;
+    --card-foreground: 170 50% 95%;
+    --popover: 190 80% 6%;
+    --popover-foreground: 170 50% 95%;
+    --primary: 172 95% 42%;
+    --primary-foreground: 190 90% 5%;
+    --secondary: 190 55% 15%;
+    --secondary-foreground: 170 50% 95%;
+    --muted: 190 50% 13%;
+    --muted-foreground: 175 30% 68%;
+    --accent: 172 70% 16%;
+    --accent-foreground: 172 90% 85%;
+    --destructive: 0 90% 68%;
+    --destructive-foreground: 190 90% 5%;
+    --border: 174 50% 18%;
+    --input: 174 50% 18%;
+    --ring: 172 95% 42%;
   }
 
   * {
