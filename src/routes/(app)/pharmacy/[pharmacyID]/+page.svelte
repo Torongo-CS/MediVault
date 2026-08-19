@@ -158,9 +158,8 @@
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const h1 = Math.abs(hash % 360);
-    const h2 = (h1 + 40) % 360;
-    return `linear-gradient(135deg, hsl(${h1}, 65%, 55%), hsl(${h2}, 75%, 45%))`;
+    const opacity = 0.8 + (Math.abs(hash % 20) / 100);
+    return `linear-gradient(135deg, hsl(var(--primary) / ${opacity.toFixed(2)}), hsl(var(--accent) / 0.95))`;
   }
 
   function getInitials(name: string): string {
@@ -181,12 +180,12 @@
   />
 
   <!-- Pharmacy Banner -->
-  <div class="rounded-xl border overflow-hidden bg-card">
+  <div class="rounded-xl border overflow-hidden bg-card shadow-sm">
     <div
-      class="h-32 sm:h-40 flex items-center justify-center relative"
+      class="h-36 sm:h-44 flex items-center justify-center relative"
       style:background={getGradient(pharmacy.name)}
     >
-      <span class="text-white font-black text-5xl drop-shadow-lg select-none">
+      <span class="text-primary-foreground font-black text-6xl drop-shadow-md select-none">
         {getInitials(pharmacy.name)}
       </span>
     </div>
@@ -194,27 +193,27 @@
     <div class="p-5 sm:p-6">
       <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
-          <h1 class="text-xl font-bold text-foreground mb-1">{pharmacy.name}</h1>
-          <p class="text-sm text-muted-foreground mb-3 max-w-xl">{pharmacy.description}</p>
-          <div class="flex flex-wrap gap-x-5 gap-y-1.5">
-            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin class="h-3.5 w-3.5 text-primary/60" />
+          <h1 class="text-2xl font-bold text-foreground mb-1">{pharmacy.name}</h1>
+          <p class="text-sm text-muted-foreground mb-4 max-w-xl leading-relaxed">{pharmacy.description}</p>
+          <div class="flex flex-wrap gap-x-6 gap-y-2">
+            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <MapPin class="h-3.5 w-3.5 text-primary shrink-0" />
               {pharmacy.address}
             </span>
-            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Phone class="h-3.5 w-3.5 text-primary/60" />
+            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <Phone class="h-3.5 w-3.5 text-primary shrink-0" />
               {pharmacy.phone}
             </span>
             {#if pharmacy.licenseNumber}
-              <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Shield class="h-3.5 w-3.5 text-primary/60" />
+              <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+                <Shield class="h-3.5 w-3.5 text-primary shrink-0" />
                 {pharmacy.licenseNumber}
               </span>
             {/if}
           </div>
         </div>
 
-        <Button variant="outline" size="sm" class="shrink-0 gap-1.5 text-xs font-semibold">
+        <Button variant="outline" size="sm" class="shrink-0 gap-1.5 text-xs font-semibold hover:border-primary/50 hover:text-primary">
           <Heart class="h-3.5 w-3.5" />
           Favorite
         </Button>

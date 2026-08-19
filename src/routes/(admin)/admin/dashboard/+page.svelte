@@ -48,8 +48,8 @@
   // Pie Chart Calculation
   const totalChartValue = chartData.reduce((sum, d) => sum + d.value, 0);
   let currentPercentage = 0;
-  // Use tailwind-compatible vivid colors for the slices
-  const colors = ["#f97316", "#3b82f6", "#10b981", "#8b5cf6", "#ec4899", "#eab308"];
+  // Use Vital Teal accent colors for the slices
+  const colors = ["#14b8a6", "#2dd4bf", "#06b6d4", "#0284c7", "#10b981", "#f43f5e"];
   
   const pieChartData = chartData.map((d, i) => {
     const percentage = (d.value / totalChartValue) * 100;
@@ -85,8 +85,7 @@
       </Card.Header>
       <Card.Content>
         <div class="dashboard-card-value">${totalRevenue.toFixed(2)}</div>
-        <br>
-        <p class="text-xs text-muted-foreground">Across all transactions</p>
+        <p class="text-xs text-muted-foreground mt-1">Across all transactions</p>
       </Card.Content>
     </Card.Root>
     <Card.Root>
@@ -100,8 +99,7 @@
       </Card.Header>
       <Card.Content>
         <div class="dashboard-card-value">{totalUsers}</div>
-        <br>
-        <p class="text-xs text-muted-foreground">Registered on platform</p>
+        <p class="text-xs text-muted-foreground mt-1">Registered on platform</p>
       </Card.Content>
     </Card.Root>
     <Card.Root>
@@ -114,8 +112,7 @@
       </Card.Header>
       <Card.Content>
         <div class="dashboard-card-value">{totalSales}</div>
-        <br>
-        <p class="text-xs text-muted-foreground">Total completed orders</p>
+        <p class="text-xs text-muted-foreground mt-1">Total completed orders</p>
       </Card.Content>
     </Card.Root>
     <Card.Root>
@@ -127,8 +124,7 @@
       </Card.Header>
       <Card.Content>
         <div class="dashboard-card-value">{activeComplaints}</div>
-        <br>
-        <p class="text-xs text-muted-foreground">Require attention</p>
+        <p class="text-xs text-muted-foreground mt-1">Require attention</p>
       </Card.Content>
     </Card.Root>
   </div>
