@@ -40,7 +40,7 @@
      THEME 1: VITAL TEAL (Alt + 1)
      ======================================================== */
   :root, [data-theme="theme-1"] {
-    --background: 180 30% 97%;       /* Ice Mint Teal (#f0fdfa) */
+    --background: 176 35% 96%;       /* Silky Vital Teal Ice Tint (#ecfdf9) */
     --foreground: 190 85% 11%;     /* Deep Vital Ocean Teal Text (#042f2e) */
     --card: 0 0% 100%;              /* High-Clarity Pure White Card (#ffffff) */
     --card-foreground: 190 85% 11%;
@@ -87,7 +87,7 @@
      THEME 2: VITAL CYAN (Alt + 2)
      ======================================================== */
   [data-theme="theme-2"] {
-    --background: 200 45% 97%;       /* Ice Sapphire Tint (#f0f9ff) */
+    --background: 198 45% 96%;       /* Ice Sapphire Tint (#e0f2fe) */
     --foreground: 222 47% 11%;     /* Deep Navy Text (#0f172a) */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -131,7 +131,7 @@
      THEME 3: VITAL EMERALD (Alt + 3)
      ======================================================== */
   [data-theme="theme-3"] {
-    --background: 160 40% 97%;       /* Ice Mint Tint (#ecfdf5) */
+    --background: 158 40% 96%;       /* Ice Bio Mint Tint (#e6fcf2) */
     --foreground: 165 80% 10%;     /* Deep Bio Emerald Text (#022c22) */
     --card: 0 0% 100%;
     --card-foreground: 165 80% 10%;
@@ -175,7 +175,7 @@
      THEME 4: VITAL AMBER (Alt + 4)
      ======================================================== */
   [data-theme="theme-4"] {
-    --background: 40 50% 97%;        /* Warm Solar Linen (#fffbe6) */
+    --background: 42 55% 96%;        /* Warm Solar Cream Amber Tint (#fef8e7) */
     --foreground: 30 75% 12%;      /* Deep Solar Amber Text (#1f1305) */
     --card: 0 0% 100%;
     --card-foreground: 30 75% 12%;
@@ -219,7 +219,7 @@
      THEME 5: VITAL CRIMSON (Alt + 5)
      ======================================================== */
   [data-theme="theme-5"] {
-    --background: 350 45% 98%;      /* Ice Rose Tint (#fff1f2) */
+    --background: 352 50% 97%;      /* Ice Rose Crimson Tint (#ffeef1) */
     --foreground: 350 75% 12%;     /* Deep Crimson Slate Text (#1c050a) */
     --card: 0 0% 100%;
     --card-foreground: 350 75% 12%;
@@ -263,7 +263,7 @@
      THEME 6: VITAL VIOLET (Alt + 6)
      ======================================================== */
   [data-theme="theme-6"] {
-    --background: 260 45% 98%;      /* Ice Lavender Tint (#f5f3ff) */
+    --background: 262 50% 97%;      /* Ice Lavender Violet Tint (#f3eefc) */
     --foreground: 260 75% 12%;     /* Deep Violet Slate Text (#0f0720) */
     --card: 0 0% 100%;
     --card-foreground: 260 75% 12%;
@@ -307,7 +307,7 @@
      THEME 7: VITAL SLATE (Alt + 7)
      ======================================================== */
   [data-theme="theme-7"] {
-    --background: 210 40% 98%;      /* Pure Ice Slate (#f8fafc) */
+    --background: 215 45% 97%;      /* Icy Slate Blue Tint (#eff4fb) */
     --foreground: 222 47% 11%;     /* Deep Slate Text (#0f172a) */
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -342,6 +342,8 @@
     --muted-foreground: 215 20% 68%;
     --accent: 217 50% 18%;
     --accent-foreground: 217 80% 85%;
+    --destructive: 0 90% 68%;
+    --destructive-foreground: 222 47% 6%;
     --border: 217 40% 20%;
     --input: 217 40% 20%;
     --ring: 217 95% 65%;
@@ -376,6 +378,7 @@
 
   body {
     background-color: var(--color-background);
+    background-image: radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.05) 0%, transparent 65%);
     color: var(--color-foreground);
     font-family: system-ui, -apple-system, sans-serif;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;

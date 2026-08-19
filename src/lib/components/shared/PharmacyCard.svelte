@@ -32,9 +32,8 @@
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const h1 = Math.abs(hash % 360);
-    const h2 = (h1 + 40) % 360;
-    return `linear-gradient(135deg, hsl(${h1}, 65%, 55%), hsl(${h2}, 75%, 45%))`;
+    const opacity = 0.8 + (Math.abs(hash % 20) / 100);
+    return `linear-gradient(135deg, hsl(var(--primary) / ${opacity.toFixed(2)}), hsl(var(--accent) / 0.95))`;
   }
 
   function getInitials(name: string): string {
@@ -48,7 +47,7 @@
       class="pharm-card__banner h-24"
       style:background={imageUrl ? `url(${imageUrl}) center/cover` : getGradient(name)}
     >
-      <span class="pharm-card__initials text-2xl">{getInitials(name)}</span>
+      <span class="pharm-card__initials text-2xl text-primary-foreground">{getInitials(name)}</span>
     </div>
     <div class="pharm-card__body">
       <h3 class="pharm-card__name text-sm mb-0.5">{name}</h3>
@@ -57,12 +56,12 @@
   </a>
 {:else}
   <a href="/pharmacy/{id}" class="pharm-card--full group">
-    <Card.Root class="overflow-hidden border bg-card hover:shadow-lg hover:border-primary/30 transition-all duration-300">
+    <Card.Root class="overflow-hidden border bg-card hover:shadow-lg hover:border-primary/40 transition-all duration-300">
       <div
         class="pharm-card__banner h-32"
         style:background={imageUrl ? `url(${imageUrl}) center/cover` : getGradient(name)}
       >
-        <span class="pharm-card__initials text-3xl">{getInitials(name)}</span>
+        <span class="pharm-card__initials text-3xl text-primary-foreground">{getInitials(name)}</span>
 
         {#if onToggleFavorite}
           <button
@@ -77,7 +76,7 @@
             <Heart
               class="h-4 w-4 transition-all duration-200 {isFavorite
                 ? 'fill-red-500 text-red-500 scale-110'
-                : 'text-white'}"
+                : 'text-primary-foreground'}"
             />
           </button>
         {/if}
@@ -92,11 +91,11 @@
 
         <div class="pharm-card__meta-list">
           <div class="meta-row">
-            <MapPin class="h-3.5 w-3.5 shrink-0 text-primary/60" />
+            <MapPin class="h-3.5 w-3.5 shrink-0 text-primary" />
             <span class="truncate">{address}</span>
           </div>
           <div class="meta-row">
-            <Phone class="h-3.5 w-3.5 shrink-0 text-primary/60" />
+            <Phone class="h-3.5 w-3.5 shrink-0 text-primary" />
             <span>{phone}</span>
           </div>
         </div>
