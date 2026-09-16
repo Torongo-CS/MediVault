@@ -13,8 +13,8 @@ export default defineSchema({
     isActive: v.boolean(),
     createdAt: v.optional(v.number()),
   })
-  .index("by_email", ["email"])
-  .index("by_role", ["role"]),
+    .index("by_email", ["email"])
+    .index("by_role", ["role"]),
 
   // 1b. SESSIONS TABLE (Backs the httpOnly cookie issued by the SvelteKit server)
   sessions: defineTable({
@@ -23,8 +23,8 @@ export default defineSchema({
     expiresAt: v.number(),
     createdAt: v.number(),
   })
-  .index("by_token", ["token"])
-  .index("by_user", ["userId"]),
+    .index("by_token", ["token"])
+    .index("by_user", ["userId"]),
 
   // 2. MEDICINE TABLE
   medicines: defineTable({
@@ -41,7 +41,7 @@ export default defineSchema({
     expiryDate: v.number(), // Unix timestamp (ms)
     conflicts: v.array(v.string()), // List of conflicting generic names
   })
-  .index("by_genericName", ["genericName"]),
+    .index("by_genericName", ["genericName"]),
 
   // 3. RESERVATION TABLE (Submitted orders awaiting pickup)
   reservations: defineTable({
@@ -49,7 +49,7 @@ export default defineSchema({
     pharmacistId: v.optional(v.id("users")), // Claimed by pharmacist during fulfillment
     medsList: v.array(
       v.object({
-        medicineId: v.id("medicines"),
+        medicineId: v.string(),
         quantity: v.number(),
       })
     ),
@@ -65,10 +65,10 @@ export default defineSchema({
       v.literal("cancelled")
     ),
   })
-  .index("by_customer", ["customerId"]) // Drives customer Order History queries
-  .index("by_pharmacist", ["pharmacistId"])
-  .index("by_status", ["status"])
-  .index("by_pickupDate", ["pickupDate"]), // Efficient indexing for cron cleanups
+    .index("by_customer", ["customerId"]) // Drives customer Order History queries
+    .index("by_pharmacist", ["pharmacistId"])
+    .index("by_status", ["status"])
+    .index("by_pickupDate", ["pickupDate"]), // Efficient indexing for cron cleanups
 
   // 4. PRESCRIPTIONS TABLE (Customer document vault for personal safekeeping)
   prescriptions: defineTable({
@@ -77,14 +77,14 @@ export default defineSchema({
     imageUrl: v.string(),
     userId: v.id("users"),
   })
-  .index("by_user", ["userId"]),
+    .index("by_user", ["userId"]),
 
   // 5. FAVORITES TABLE (Customers saving preferred pharmacists)
   favorites: defineTable({
-    customerId: v.id("users"), 
-    pharmacistId: v.id("users"), 
+    customerId: v.id("users"),
+    pharmacistId: v.id("users"),
   })
-  .index("by_customer", ["customerId"]),
+    .index("by_customer", ["customerId"]),
 
   // 6. COMPLAINT TICKETS (The parent ticket thread)
   complaintTickets: defineTable({
@@ -94,28 +94,28 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(), // Allows admin panel to sort by the thread with the newest reply
   })
-  .index("by_creator", ["creatorId"])
-  .index("by_status", ["status"])
-  .index("by_updatedAt", ["updatedAt"]),
+    .index("by_creator", ["creatorId"])
+    .index("by_status", ["status"])
+    .index("by_updatedAt", ["updatedAt"]),
 
   // 7. COMPLAINT MESSAGES (The back-and-forth chat history inside a ticket)
   complaintMessages: defineTable({
     ticketId: v.id("complaintTickets"),
-    senderId: v.id("users"), 
+    senderId: v.id("users"),
     message: v.string(),
     timestamp: v.number(),
   })
-  .index("by_ticket", ["ticketId"]),
+    .index("by_ticket", ["ticketId"]),
 
   // 8. NOTIFICATION TABLE (One-way operational pings from pharmacist to customer)
   notifications: defineTable({
-    senderId: v.id("users"), 
-    receiverId: v.id("users"), 
+    senderId: v.id("users"),
+    receiverId: v.id("users"),
     message: v.string(),
     isRead: v.boolean(),
     timestamp: v.number(),
   })
-  .index("by_receiver", ["receiverId"]),
+    .index("by_receiver", ["receiverId"]),
 
   // 9. TRANSACTION RECORD TABLE (Generated when order status changes to "completed")
   transactionRecords: defineTable({
@@ -123,7 +123,7 @@ export default defineSchema({
     completedAt: v.number(),
     itemsSnapshot: v.array(
       v.object({
-        medicineId: v.id("medicines"),
+        medicineId: v.string(),
         quantity: v.number(),
         unitCostingPriceAtSale: v.number(), // Avoids breaking financial logs if master items change price
         unitSellingPriceAtSale: v.number(),
@@ -131,5 +131,5 @@ export default defineSchema({
     ),
     totalRevenue: v.number(),
   })
-  .index("by_reservation", ["reservationId"]),
+    .index("by_reservation", ["reservationId"]),
 });

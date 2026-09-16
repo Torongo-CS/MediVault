@@ -1,0 +1,8 @@
+http://localhost:5173/history      -> only lists cancelled items by pharmacist, doesnt list the approved items. 
+
+http://localhost:5173/dashboard    -> notification button lists dummy hardcoded data
+                                   -> cards show dummy hardcoded data
+                                   -> no page for pending approvals, it goes to reservations. remove it and put order history card there
+
+http://localhost:5173/reservations -> heading contains [MediVault pharmacy], should be pharmacy name from where the items has ordered
+                                   -> lists as [med-1 X n], should be medicines name with quantity 

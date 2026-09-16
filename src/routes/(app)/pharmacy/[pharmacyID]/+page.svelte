@@ -18,18 +18,75 @@
     Shield,
   } from "lucide-svelte";
 
+  const pharmacyList = [
+    {
+      id: "ph-1",
+      name: "HealthPlus Pharmacy",
+      address: "42 Mirpur Road, Dhaka 1205",
+      phone: "+880 1712-345678",
+      description:
+        "Your trusted neighborhood pharmacy with 24/7 service, competitive prices, and a wide range of prescription and OTC medicines.",
+      licenseNumber: "DGDA-2024-0042",
+    },
+    {
+      id: "ph-2",
+      name: "CarePoint Medical Store",
+      address: "15 Gulshan Avenue, Dhaka 1212",
+      phone: "+880 1898-765432",
+      description:
+        "Premium pharmacy specializing in imported medicines and healthcare products.",
+      licenseNumber: "DGDA-2024-0043",
+    },
+    {
+      id: "ph-3",
+      name: "MediCare Pharmacy",
+      address: "7 Dhanmondi R/A, Dhaka 1209",
+      phone: "+880 1555-112233",
+      description:
+        "Family-owned pharmacy serving the community for over 20 years.",
+      licenseNumber: "DGDA-2024-0044",
+    },
+    {
+      id: "ph-4",
+      name: "Green Cross Dispensary",
+      address: "89 Banani Model Town, Dhaka 1213",
+      phone: "+880 1678-998877",
+      description:
+        "Modern dispensary with digital prescription management and home delivery.",
+      licenseNumber: "DGDA-2024-0045",
+    },
+    {
+      id: "ph-5",
+      name: "University Health Center",
+      address: "BUET Campus, Polashi, Dhaka 1000",
+      phone: "+880 1911-445566",
+      description:
+        "Campus health center providing affordable medicines for students and staff.",
+      licenseNumber: "DGDA-2024-0046",
+    },
+    {
+      id: "ph-6",
+      name: "Lazz Pharma",
+      address: "156 Motijheel C/A, Dhaka 1000",
+      phone: "+880 1811-223344",
+      description:
+        "One of the largest pharmacy chains in Bangladesh with extensive stock.",
+      licenseNumber: "DGDA-2024-0047",
+    },
+  ];
+
   const pharmacyId = $derived(page.params.pharmacyID ?? "");
 
-  // Mock pharmacy data — will be replaced with Convex query
-  const pharmacy = $derived({
-    id: pharmacyId,
-    name: "HealthPlus Pharmacy",
-    address: "42 Mirpur Road, Dhaka 1205",
-    phone: "+880 1712-345678",
-    description:
-      "Your trusted neighborhood pharmacy with 24/7 service, competitive prices, and a wide range of prescription and OTC medicines.",
-    licenseNumber: "DGDA-2024-0042",
-  });
+  const pharmacy = $derived(
+    pharmacyList.find((p) => p.id === pharmacyId) ?? {
+      id: pharmacyId,
+      name: "HealthPlus Pharmacy",
+      address: "42 Mirpur Road, Dhaka 1205",
+      phone: "+880 1712-345678",
+      description: "Your trusted neighborhood pharmacy.",
+      licenseNumber: "DGDA-2024-0042",
+    },
+  );
 
   // Search & filter state
   let searchQuery = $state("");
@@ -121,7 +178,7 @@
         (m) =>
           m.name.toLowerCase().includes(q) ||
           m.genericName.toLowerCase().includes(q) ||
-          m.symptoms.some((s) => s.toLowerCase().includes(q))
+          m.symptoms.some((s) => s.toLowerCase().includes(q)),
       );
     }
 
@@ -146,10 +203,10 @@
 
   // Cart summary for this pharmacy
   const cartItemsHere = $derived(
-    cart.pharmacyId === pharmacyId ? cart.itemCount : 0
+    cart.pharmacyId === pharmacyId ? cart.itemCount : 0,
   );
   const cartTotalHere = $derived(
-    cart.pharmacyId === pharmacyId ? cart.subtotal : 0
+    cart.pharmacyId === pharmacyId ? cart.subtotal : 0,
   );
 
   // Pharmacy gradient
@@ -158,7 +215,7 @@
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const opacity = 0.8 + (Math.abs(hash % 20) / 100);
+    const opacity = 0.8 + Math.abs(hash % 20) / 100;
     return `linear-gradient(135deg, hsl(var(--primary) / ${opacity.toFixed(2)}), hsl(var(--accent) / 0.95))`;
   }
 
@@ -173,11 +230,7 @@
 </script>
 
 <div class="space-y-6">
-  <PageHeader
-    title=""
-    showBack={true}
-    backHref="/pharmacy"
-  />
+  <PageHeader title="" showBack={true} backHref="/pharmacy" />
 
   <!-- Pharmacy Banner -->
   <div class="rounded-xl border overflow-hidden bg-card shadow-sm">
@@ -185,27 +238,43 @@
       class="h-36 sm:h-44 flex items-center justify-center relative"
       style:background={getGradient(pharmacy.name)}
     >
-      <span class="text-primary-foreground font-black text-6xl drop-shadow-md select-none">
+      <span
+        class="text-primary-foreground font-black text-6xl drop-shadow-md select-none"
+      >
         {getInitials(pharmacy.name)}
       </span>
     </div>
 
     <div class="p-5 sm:p-6">
-      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+      <div
+        class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3"
+      >
         <div>
-          <h1 class="text-2xl font-bold text-foreground mb-1">{pharmacy.name}</h1>
-          <p class="text-sm text-muted-foreground mb-4 max-w-xl leading-relaxed">{pharmacy.description}</p>
+          <h1 class="text-2xl font-bold text-foreground mb-1">
+            {pharmacy.name}
+          </h1>
+          <p
+            class="text-sm text-muted-foreground mb-4 max-w-xl leading-relaxed"
+          >
+            {pharmacy.description}
+          </p>
           <div class="flex flex-wrap gap-x-6 gap-y-2">
-            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+            <span
+              class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
+            >
               <MapPin class="h-3.5 w-3.5 text-primary shrink-0" />
               {pharmacy.address}
             </span>
-            <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+            <span
+              class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
+            >
               <Phone class="h-3.5 w-3.5 text-primary shrink-0" />
               {pharmacy.phone}
             </span>
             {#if pharmacy.licenseNumber}
-              <span class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <span
+                class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
+              >
                 <Shield class="h-3.5 w-3.5 text-primary shrink-0" />
                 {pharmacy.licenseNumber}
               </span>
@@ -213,7 +282,11 @@
           </div>
         </div>
 
-        <Button variant="outline" size="sm" class="shrink-0 gap-1.5 text-xs font-semibold hover:border-primary/50 hover:text-primary">
+        <Button
+          variant="outline"
+          size="sm"
+          class="shrink-0 gap-1.5 text-xs font-semibold hover:border-primary/50 hover:text-primary"
+        >
           <Heart class="h-3.5 w-3.5" />
           Favorite
         </Button>
@@ -224,7 +297,9 @@
   <!-- Search & Filter -->
   <div class="space-y-3">
     <div class="relative">
-      <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <Search
+        class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+      />
       <Input
         type="text"
         placeholder="Search medicines by name, generic name, or symptom..."
@@ -249,7 +324,8 @@
 
   <!-- Results -->
   <p class="text-xs text-muted-foreground">
-    Showing <strong class="text-foreground">{filteredMedicines().length}</strong> medicines
+    Showing <strong class="text-foreground">{filteredMedicines().length}</strong
+    > medicines
   </p>
 
   {#if filteredMedicines().length === 0}
@@ -259,7 +335,9 @@
       description="Try adjusting your search or removing filters."
     />
   {:else}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+    >
       {#each filteredMedicines() as med (med.medicineId)}
         <MedicineCard
           medicineId={med.medicineId}
@@ -269,7 +347,7 @@
           stock={med.stock}
           requiresPrescription={med.requiresPrescription}
           symptoms={med.symptoms}
-          pharmacyId={pharmacyId}
+          {pharmacyId}
           pharmacyName={pharmacy?.name ?? "Pharmacy"}
           detailHref="/pharmacy/{pharmacyId}/{med.medicineId}"
         />
@@ -282,19 +360,28 @@
     <div
       class="fixed bottom-0 left-0 right-0 z-40 border-t bg-card/95 backdrop-blur-sm shadow-lg"
     >
-      <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div
+        class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between"
+      >
         <div class="flex items-center gap-3">
-          <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+          <div
+            class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center"
+          >
             <ShoppingCart class="h-4 w-4 text-primary" />
           </div>
           <div>
             <p class="text-sm font-semibold text-foreground">
               {cartItemsHere} item{cartItemsHere === 1 ? "" : "s"} in cart
             </p>
-            <p class="text-xs text-muted-foreground">৳{cartTotalHere.toFixed(2)} estimated</p>
+            <p class="text-xs text-muted-foreground">
+              ৳{cartTotalHere.toFixed(2)} estimated
+            </p>
           </div>
         </div>
-        <Button class="text-xs font-semibold gap-1.5" onclick={() => cart.open()}>
+        <Button
+          class="text-xs font-semibold gap-1.5"
+          onclick={() => cart.open()}
+        >
           <ShoppingCart class="h-3.5 w-3.5" />
           View Cart
         </Button>

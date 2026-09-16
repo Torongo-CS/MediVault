@@ -4,10 +4,23 @@
   import { Button } from "$lib/components/ui/button";
   import { Separator } from "$lib/components/ui/separator";
   import QuantitySelector from "./QuantitySelector.svelte";
-  import { ShoppingCart, Trash2, Store, FileText, AlertTriangle, CalendarDays, Bell } from "lucide-svelte";
+  import {
+    ShoppingCart,
+    Trash2,
+    Store,
+    FileText,
+    AlertTriangle,
+    CalendarDays,
+    Bell,
+  } from "lucide-svelte";
   import { cart } from "$lib/stores/cartStore.svelte";
+  import { toast } from "svelte-sonner";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../convex/_generated/api";
 
-  function handleRemove(medicineId: string) { cart.removeItem(medicineId); }
+  function handleRemove(medicineId: string) {
+    cart.removeItem(medicineId);
+  }
   function handleClear() {
     cart.clearCart();
     pickupDate = "";
@@ -15,13 +28,67 @@
 
   // Pickup date — minimum is tomorrow
   let pickupDate = $state("");
-  const tomorrow = $derived(() => {
+  const tomorrowStr = $derived.by(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
     return d.toISOString().split("T")[0];
   });
 
-  const canSubmit = $derived(pickupDate.length > 0);
+  let isSubmitting = $state(false);
+
+  async function handleCheckout() {
+    if (!pickupDate) {
+      toast.error("Please select a valid pickup date.");
+      return;
+    }
+
+    isSubmitting = true;
+    try {
+      // Create reservation in Convex database
+      const medsList = cart.items.map((i) => ({
+        medicineId: i.medicineId as any,
+        quantity: i.quantity,
+      }));
+
+      const pickupTimestamp = new Date(pickupDate).getTime();
+
+      await convex.mutation(api.reservations.create, {
+        customerEmail: "customer@medivault.com",
+        medsList,
+        pickupDate: pickupTimestamp,
+      });
+
+      toast.success(
+        "Reservation submitted successfully! Awaiting pharmacist approval.",
+      );
+      cart.clearCart();
+      pickupDate = "";
+      cart.close();
+    } catch (err: any) {
+      toast.error(
+        err.message || "Failed to place reservation. Please try again.",
+      );
+    } finally {
+      isSubmitting = false;
+    }
+  }
+
+  const canSubmit = $derived(pickupDate.length > 0 && !isSubmitting);
+
+  const conflictWarnings = $derived.by(() => {
+    const generics = cart.items.map((i) => i.genericName.toLowerCase());
+    const warnings: string[] = [];
+
+    if (
+      generics.some((g) => g.includes("paracetamol") || g.includes("acetaminophen")) &&
+      generics.some((g) => g.includes("ibuprofen") || g.includes("warfarin") || g.includes("aspirin"))
+    ) {
+      warnings.push(
+        "Combining Paracetamol and Ibuprofen (NSAID) increases risk of gastrointestinal irritation and strain."
+      );
+    }
+    return warnings;
+  });
 </script>
 
 <Sheet.Root bind:open={cart.isOpen}>
@@ -33,7 +100,8 @@
           <ShoppingCart class="h-4.5 w-4.5 text-primary" />
         </div>
         <div>
-          <Sheet.Title class="text-base font-bold">Reservation Cart</Sheet.Title>
+          <Sheet.Title class="text-base font-bold">Reservation Cart</Sheet.Title
+          >
           <Sheet.Description class="text-xs text-muted-foreground">
             {#if cart.isEmpty}
               Your cart is empty
@@ -52,14 +120,22 @@
           <div class="empty-state__icon-wrap">
             <ShoppingCart class="h-7 w-7 text-muted-foreground" />
           </div>
-          <p class="text-sm font-semibold text-foreground mb-1">Your cart is empty</p>
-          <p class="text-xs text-muted-foreground">Browse a pharmacy to add medicines to your reservation.</p>
+          <p class="text-sm font-semibold text-foreground mb-1">
+            Your cart is empty
+          </p>
+          <p class="text-xs text-muted-foreground">
+            Browse a pharmacy to add medicines to your reservation.
+          </p>
         </div>
       {:else}
         <div class="cart-pharmacy-label">
           <div class="meta-row">
             <Store class="h-3.5 w-3.5" />
-            <span>Reserving from <strong class="text-foreground">{cart.pharmacyName}</strong></span>
+            <span
+              >Reserving from <strong class="text-foreground"
+                >{cart.pharmacyName}</strong
+              ></span
+            >
           </div>
         </div>
 
@@ -80,7 +156,9 @@
                     onclick={() => handleRemove(item.medicineId)}
                     aria-label="Remove {item.medicineName}"
                   >
-                    <Trash2 class="h-3.5 w-3.5 text-muted-foreground hover:text-destructive" />
+                    <Trash2
+                      class="h-3.5 w-3.5 text-muted-foreground hover:text-destructive"
+                    />
                   </button>
                 </div>
 
@@ -88,12 +166,17 @@
                   <QuantitySelector
                     value={item.quantity}
                     max={item.stock}
-                    onchange={(qty) => cart.updateQuantity(item.medicineId, qty)}
+                    onchange={(qty) =>
+                      cart.updateQuantity(item.medicineId, qty)}
                     compact
                   />
                   <div class="text-right">
-                    <p class="cart-item__price">৳{(item.unitPrice * item.quantity).toFixed(2)}</p>
-                    <p class="cart-item__unit-price">৳{item.unitPrice.toFixed(2)} × {item.quantity}</p>
+                    <p class="cart-item__price">
+                      ৳{(item.unitPrice * item.quantity).toFixed(2)}
+                    </p>
+                    <p class="cart-item__unit-price">
+                      ৳{item.unitPrice.toFixed(2)} × {item.quantity}
+                    </p>
                   </div>
                 </div>
 
@@ -113,12 +196,39 @@
     <!-- Footer -->
     {#if !cart.isEmpty}
       <div class="cart-footer">
+        {#if conflictWarnings.length > 0}
+          <div class="cart-footer__rx-alert bg-rose-500/10 border-rose-500/30">
+            <AlertTriangle
+              class="h-4 w-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5"
+            />
+            <div class="flex-1 min-w-0">
+              <p
+                class="text-[11px] text-rose-700 dark:text-rose-300 font-semibold"
+              >
+                Drug Safety Interaction Warning
+              </p>
+              {#each conflictWarnings as warn}
+                <p
+                  class="text-[11px] text-rose-600 dark:text-rose-400 mt-0.5 leading-relaxed"
+                >
+                  {warn}
+                </p>
+              {/each}
+            </div>
+          </div>
+        {/if}
+
         {#if cart.needsPrescription}
           <div class="cart-footer__rx-alert">
-            <AlertTriangle class="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <AlertTriangle
+              class="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+            />
             <div class="flex-1 min-w-0">
-              <p class="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
-                Some items require a prescription. Attach one from your vault before checkout.
+              <p
+                class="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed"
+              >
+                Some items require a prescription. Attach one from your vault
+                before checkout.
               </p>
               <a
                 href="/prescriptions"
@@ -143,7 +253,7 @@
             id="cart-pickup-date-input"
             type="date"
             bind:value={pickupDate}
-            min={tomorrow()}
+            min={tomorrowStr}
             class="cart-pickup-date__input"
           />
           {#if pickupDate}
@@ -156,18 +266,27 @@
 
         <div class="cart-footer__total-row">
           <span class="cart-footer__total-label">Estimated Total</span>
-          <span class="cart-footer__total-amount">৳{cart.subtotal.toFixed(2)}</span>
+          <span class="cart-footer__total-amount"
+            >৳{cart.subtotal.toFixed(2)}</span
+          >
         </div>
 
         <div class="cart-footer__actions">
-          <Button variant="outline" class="flex-1 text-xs font-semibold" onclick={handleClear}>Clear Cart</Button>
-          <Button class="flex-1 text-xs font-semibold gap-1.5" disabled={!canSubmit}>
+          <Button
+            variant="outline"
+            class="flex-1 text-xs font-semibold"
+            onclick={handleClear}>Clear Cart</Button
+          >
+          <Button
+            class="flex-1 text-xs font-semibold gap-1.5"
+            disabled={!canSubmit}
+            onclick={handleCheckout}
+          >
             <CalendarDays class="h-3.5 w-3.5" />
-            Place Reservation
+            {isSubmitting ? "Submitting..." : "Place Reservation"}
           </Button>
         </div>
       </div>
     {/if}
   </Sheet.Content>
 </Sheet.Root>
-
