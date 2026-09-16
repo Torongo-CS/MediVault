@@ -64,11 +64,14 @@
     "Dosage rules for Amoxicillin 250mg",
   ];
 
-  function sendPrompt(promptText?: string) {
+  async function sendPrompt(promptText?: string) {
     const textToSend = promptText || userInput;
-    if (!textToSend.trim()) return;
+    if (!textToSend.trim() || isAnalyzing) return;
 
-    // Push user message
+    const chatHistory = messages
+      .filter((m) => m.id !== "1")
+      .map((m) => ({ role: m.role, content: m.content }));
+
     messages = [
       ...messages,
       {
@@ -86,66 +89,23 @@
     if (!promptText) userInput = "";
     isAnalyzing = true;
 
-    // Simulate AI response
-    setTimeout(() => {
-      let botResponse =
-        "Based on your prompt, here is the clinical information from our database:";
-      let suggested: Array<{
-        name: string;
-        generic: string;
-        rx: boolean;
-        price: string;
-      }> = [];
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: textToSend,
+          history: chatHistory,
+        }),
+      });
 
-      const queryLower = textToSend.toLowerCase();
+      if (!res.ok) {
+        throw new Error(`Server status ${res.status}`);
+      }
 
-      if (
-        queryLower.includes("fever") ||
-        queryLower.includes("ache") ||
-        queryLower.includes("pain")
-      ) {
-        botResponse =
-          "For fever and body pain, Paracetamol 500mg or Ibuprofen 400mg are commonly recommended over-the-counter analgesics. Ensure you stay hydrated and follow recommended daily dosage limits.";
-        suggested = [
-          {
-            name: "Paracetamol 500mg",
-            generic: "Paracetamol",
-            rx: false,
-            price: "$5.00",
-          },
-          {
-            name: "Ibuprofen 400mg",
-            generic: "Ibuprofen",
-            rx: false,
-            price: "$6.50",
-          },
-        ];
-      } else if (
-        queryLower.includes("interact") ||
-        queryLower.includes("conflict") ||
-        queryLower.includes("warfarin")
-      ) {
-        botResponse =
-          "⚠️ Interaction Warning: High-dose Paracetamol or Aspirin may enhance the anticoagulant effect of Warfarin. Always consult your pharmacist or physician before combining NSAIDs with blood thinners.";
-        suggested = [
-          {
-            name: "Warfarin Interaction Warning",
-            generic: "High Risk Combination",
-            rx: true,
-            price: "Consult Pharmacist",
-          },
-        ];
-      } else {
-        botResponse =
-          "I have analyzed your request against MediVault's medicine database. For chronic symptoms or prescription antibiotics, please consult a registered medical practitioner.";
-        suggested = [
-          {
-            name: "Amoxicillin 250mg",
-            generic: "Amoxicillin",
-            rx: true,
-            price: "$15.00",
-          },
-        ];
+      const data = await res.json();
+      if (data.notice) {
+        toast.info(data.notice, { duration: 4000 });
       }
 
       messages = [
@@ -153,17 +113,33 @@
         {
           id: (Date.now() + 1).toString(),
           role: "assistant",
-          content: botResponse,
+          content: data.reply || "No clinical content returned.",
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",
           }),
-          suggestedMeds: suggested,
+          suggestedMeds: data.suggestedMeds || [],
         },
       ];
-
+    } catch (err: any) {
+      toast.error("Failed to connect to AI Assistant");
+      messages = [
+        ...messages,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content:
+            "I encountered a connectivity issue contacting the clinical AI backend. Please check your network connection and server configuration.",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          suggestedMeds: [],
+        },
+      ];
+    } finally {
       isAnalyzing = false;
-    }, 800);
+    }
   }
 
   function handleDrop(e: DragEvent) {
