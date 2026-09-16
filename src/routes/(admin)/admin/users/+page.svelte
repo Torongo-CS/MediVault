@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import * as Table from "$lib/components/ui/table";
   import { Button } from "$lib/components/ui/button";
   import { Badge } from "$lib/components/ui/badge";
@@ -7,10 +8,14 @@
   import { Label } from "$lib/components/ui/label";
   import { toast } from "svelte-sonner";
   import dummyData from "../../../../../convex/dummyData.json";
-  import { Edit, Trash2, UserPlus, Search } from "lucide-svelte";
+  import { Edit, Trash2, UserPlus, Search, RefreshCw, Power } from "lucide-svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
 
   // State
-  let users = $state([...dummyData.users]);
+  let users = $state<any[]>([...dummyData.users]);
+  let isLoading = $state(true);
+  let isSubmitting = $state(false);
   let searchQuery = $state("");
   let isDialogOpen = $state(false);
   let isDeleteDialogOpen = $state(false);
@@ -18,31 +23,61 @@
   let userToDelete = $state<any>(null);
 
   // Form states
+  let formName = $state("");
   let formEmail = $state("");
-  let formRole = $state("customer");
-  let formStatus = $state("true");
+  let formPhone = $state("");
+  let formRole = $state<"admin" | "pharmacist" | "customer">("customer");
+  let formStatus = $state(true);
 
   // Filtered Users
   let filteredUsers = $derived(
     users.filter(u => 
       u.email.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       u.role.toLowerCase().includes(searchQuery.toLowerCase())
     )
   );
 
+  async function fetchUsers() {
+    isLoading = true;
+    try {
+      const res = await convex.query(api.admin.listUsers, {});
+      if (res && res.length > 0) {
+        users = res;
+      }
+    } catch (err) {
+      console.warn("Using local fallback data:", err);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  onMount(() => {
+    fetchUsers();
+    // Subscribe to live database updates if online
+    const unsubscribe = convex.onUpdate(api.admin.listUsers, {}, (updated) => {
+      if (updated) users = updated;
+    });
+    return () => unsubscribe();
+  });
+
   function openCreateDialog() {
     editingUser = null;
+    formName = "";
     formEmail = "";
+    formPhone = "";
     formRole = "customer";
-    formStatus = "true";
+    formStatus = true;
     isDialogOpen = true;
   }
 
   function openEditDialog(user: any) {
     editingUser = user;
+    formName = user.name || "";
     formEmail = user.email;
+    formPhone = user.phone || "";
     formRole = user.role;
-    formStatus = user.isActive ? "true" : "false";
+    formStatus = user.isActive ?? true;
     isDialogOpen = true;
   }
 
@@ -51,39 +86,90 @@
     isDeleteDialogOpen = true;
   }
 
-  function saveUser() {
+  async function saveUser() {
     if (!formEmail.trim()) {
       toast.error("Email is required");
       return;
     }
 
-    if (editingUser) {
-      users = users.map(u => 
-        u._id === editingUser._id 
-          ? { ...u, email: formEmail, role: formRole } 
-          : u
-      );
-      toast.success("User updated successfully");
-    } else {
-      const newUser = {
-        _id: `user_${Date.now()}`,
-        email: formEmail,
-        role: formRole,
-        isActive: true,
-        passwordHash: "dummy_hash"
-      };
-      users = [newUser, ...users];
-      toast.success("User created successfully");
+    isSubmitting = true;
+    try {
+      if (editingUser) {
+        // Update user
+        await convex.mutation(api.admin.updateUser, {
+          userId: editingUser._id,
+          email: formEmail.trim(),
+          name: formName.trim(),
+          phone: formPhone.trim(),
+          role: formRole,
+          isActive: formStatus,
+        });
+
+        users = users.map(u => 
+          u._id === editingUser._id 
+            ? { ...u, email: formEmail, name: formName, phone: formPhone, role: formRole, isActive: formStatus } 
+            : u
+        );
+        toast.success("User updated successfully in Convex DB");
+      } else {
+        // Create user
+        const newId = await convex.mutation(api.admin.createUser, {
+          email: formEmail.trim(),
+          name: formName.trim(),
+          phone: formPhone.trim(),
+          role: formRole,
+          isActive: formStatus,
+        });
+
+        const newUser = {
+          _id: newId,
+          email: formEmail.trim(),
+          name: formName.trim(),
+          phone: formPhone.trim(),
+          role: formRole,
+          isActive: formStatus,
+          createdAt: Date.now()
+        };
+        users = [newUser, ...users];
+        toast.success("User created successfully in Convex DB");
+      }
+      isDialogOpen = false;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save user");
+    } finally {
+      isSubmitting = false;
     }
-    isDialogOpen = false;
   }
 
-  function deleteUser() {
-    if (userToDelete) {
+  async function toggleStatus(user: any) {
+    const nextStatus = !user.isActive;
+    try {
+      await convex.mutation(api.admin.toggleUserActive, {
+        userId: user._id,
+        isActive: nextStatus,
+      });
+      users = users.map(u => u._id === user._id ? { ...u, isActive: nextStatus } : u);
+      toast.success(`User ${nextStatus ? "activated" : "deactivated"}`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to toggle status");
+    }
+  }
+
+  async function deleteUser() {
+    if (!userToDelete) return;
+    isSubmitting = true;
+    try {
+      await convex.mutation(api.admin.deleteUser, {
+        userId: userToDelete._id,
+      });
       users = users.filter(u => u._id !== userToDelete._id);
-      toast.success("User deleted successfully");
+      toast.success("User deleted successfully from Convex DB");
       isDeleteDialogOpen = false;
       userToDelete = null;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete user");
+    } finally {
+      isSubmitting = false;
     }
   }
 </script>
@@ -92,11 +178,16 @@
   <div class="dashboard-header flex justify-between items-end mb-10 border-b border-border/50 pb-6">
     <div>
       <h1 class="text-4xl md:text-4xl font-extrabold tracking-tight text-foreground">User Management</h1>
-      <p class="text-muted-foreground mt-2 text-base md:text-lg">Manage platform users, roles, and access.</p>
+      <p class="text-muted-foreground mt-2 text-base md:text-lg">Manage platform users, roles, and database access.</p>
     </div>
-    <Button onclick={openCreateDialog} class="gap-2 shadow-sm h-11 px-6">
-      <UserPlus class="w-5 h-5" /> Add User
-    </Button>
+    <div class="flex gap-3">
+      <Button variant="outline" onclick={fetchUsers} class="gap-2 h-11 px-4">
+        <RefreshCw class="w-4 h-4 {isLoading ? 'animate-spin' : ''}" /> Refresh
+      </Button>
+      <Button onclick={openCreateDialog} class="gap-2 shadow-sm h-11 px-6">
+        <UserPlus class="w-5 h-5" /> Add User
+      </Button>
+    </div>
   </div>
 
   <div class="bg-card border border-border rounded-xl shadow-md overflow-hidden">
@@ -104,7 +195,7 @@
     <div class="p-5 border-b border-border/50 flex items-center justify-between bg-muted/20">
       <div class="relative w-full max-w-md">
         <Search class="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input bind:value={searchQuery} type="text" placeholder="Search users by email or role..." class="pl-10 bg-background h-10 shadow-sm" />
+        <Input bind:value={searchQuery} type="text" placeholder="Search users by name, email or role..." class="pl-10 bg-background h-10 shadow-sm" />
       </div>
     </div>
 
@@ -114,7 +205,7 @@
         <Table.Header class="bg-muted/30">
           <Table.Row class="hover:bg-transparent">
             <Table.Head class="w-[120px] font-semibold text-muted-foreground pl-6">ID</Table.Head>
-            <Table.Head class="font-semibold text-muted-foreground">Email</Table.Head>
+            <Table.Head class="font-semibold text-muted-foreground">User</Table.Head>
             <Table.Head class="font-semibold text-muted-foreground">Role</Table.Head>
             <Table.Head class="font-semibold text-muted-foreground">Status</Table.Head>
             <Table.Head class="text-right font-semibold text-muted-foreground pr-6">Actions</Table.Head>
@@ -130,27 +221,34 @@
           {:else}
             {#each filteredUsers as user}
               <Table.Row class="group transition-colors hover:bg-muted/40 cursor-default">
-                <Table.Cell class="font-medium text-xs text-muted-foreground align-middle pl-6">{user._id}</Table.Cell>
-                <Table.Cell class="font-medium text-foreground align-middle">{user.email}</Table.Cell>
+                <Table.Cell class="font-medium text-xs text-muted-foreground align-middle pl-6 font-mono">{user._id}</Table.Cell>
+                <Table.Cell class="align-middle">
+                  <div>
+                    <p class="font-semibold text-foreground">{user.name || user.email.split('@')[0]}</p>
+                    <p class="text-xs text-muted-foreground">{user.email}</p>
+                  </div>
+                </Table.Cell>
                 <Table.Cell class="align-middle">
                   <Badge variant="outline" class={`capitalize px-2.5 py-0.5 rounded-full font-semibold tracking-wide shadow-sm border ${
                     user.role === 'admin' ? 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50' : 
                     user.role === 'pharmacist' ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800/50' : 
-                    'bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                    'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50'
                   }`}>
                     {user.role}
                   </Badge>
                 </Table.Cell>
                 <Table.Cell class="align-middle">
-                  <Badge variant="outline" class={`px-2.5 py-0.5 rounded-full font-semibold tracking-wide shadow-sm border ${
-                    user.isActive ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50' : 
-                    'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50'
-                  }`}>
-                    {user.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <button onclick={() => toggleStatus(user)} title="Click to toggle status" class="cursor-pointer">
+                    <Badge variant="outline" class={`px-2.5 py-0.5 rounded-full font-semibold tracking-wide shadow-sm border transition-transform hover:scale-105 ${
+                      user.isActive ? 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50' : 
+                      'bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-900/30 dark:text-rose-400 dark:border-rose-800/50'
+                    }`}>
+                      {user.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </button>
                 </Table.Cell>
                 <Table.Cell class="text-right align-middle pr-6">
-                  <div class="flex justify-end gap-3">
+                  <div class="flex justify-end gap-2">
                     <Button variant="ghost" size="icon" onclick={() => openEditDialog(user)}>
                       <Edit class="h-4 w-4 text-muted-foreground hover:text-foreground transition-colors" />
                     </Button>
@@ -169,31 +267,44 @@
 
   <!-- Create/Edit Dialog -->
   <Dialog.Root bind:open={isDialogOpen}>
-    <Dialog.Content class="sm:max-w-[425px]">
+    <Dialog.Content class="sm:max-w-[450px]">
       <Dialog.Header>
         <Dialog.Title>{editingUser ? 'Edit User' : 'Add New User'}</Dialog.Title>
         <Dialog.Description>
-          {editingUser ? 'Make changes to the user profile here.' : 'Add a new user to the platform. Click save when you are done.'}
+          {editingUser ? 'Update user parameters and roles.' : 'Create a new user account in Convex.'}
         </Dialog.Description>
       </Dialog.Header>
       <div class="grid gap-4 py-4">
         <div class="grid gap-2">
+          <Label for="name">Full Name</Label>
+          <Input id="name" bind:value={formName} type="text" placeholder="Dr. John Doe" />
+        </div>
+        <div class="grid gap-2">
           <Label for="email">Email Address</Label>
           <Input id="email" bind:value={formEmail} type="email" placeholder="user@example.com" />
         </div>
-        
+        <div class="grid gap-2">
+          <Label for="phone">Phone Number</Label>
+          <Input id="phone" bind:value={formPhone} type="text" placeholder="+880 1712-345678" />
+        </div>
         <div class="grid gap-2">
           <Label for="role">User Role</Label>
-          <select id="role" bind:value={formRole} class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+          <select id="role" bind:value={formRole} class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
             <option value="customer">Customer</option>
             <option value="pharmacist">Pharmacist</option>
             <option value="admin">Admin</option>
           </select>
         </div>
+        <div class="flex items-center gap-3 pt-2">
+          <input id="isActive" type="checkbox" bind:checked={formStatus} class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+          <Label for="isActive" class="cursor-pointer">Active Account</Label>
+        </div>
       </div>
       <Dialog.Footer>
         <Button variant="outline" onclick={() => isDialogOpen = false}>Cancel</Button>
-        <Button onclick={saveUser}>Save Changes</Button>
+        <Button onclick={saveUser} disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </Button>
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>
@@ -206,12 +317,14 @@
           <Trash2 class="w-5 h-5" /> Confirm Deletion
         </Dialog.Title>
         <Dialog.Description class="pt-2">
-          Are you sure you want to delete the user <strong class="text-foreground">{userToDelete?.email}</strong>? This action cannot be undone.
+          Are you sure you want to delete <strong class="text-foreground">{userToDelete?.email}</strong> from Convex? This action cannot be undone.
         </Dialog.Description>
       </Dialog.Header>
       <Dialog.Footer class="mt-4">
         <Button variant="outline" onclick={() => isDeleteDialogOpen = false}>Cancel</Button>
-        <Button variant="destructive" onclick={deleteUser}>Delete User</Button>
+        <Button variant="destructive" onclick={deleteUser} disabled={isSubmitting}>
+          {isSubmitting ? 'Deleting...' : 'Delete User'}
+        </Button>
       </Dialog.Footer>
     </Dialog.Content>
   </Dialog.Root>

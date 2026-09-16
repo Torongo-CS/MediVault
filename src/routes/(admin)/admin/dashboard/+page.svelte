@@ -1,16 +1,44 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import * as Card from "$lib/components/ui/card";
   import { Button } from "$lib/components/ui/button";
   import { Badge } from "$lib/components/ui/badge";
   import * as Table from "$lib/components/ui/table";
   import dummyData from "../../../../../convex/dummyData.json";
-  import { MessageSquare, Users, Search, Bot } from "lucide-svelte";
-  
-  // 1. Calculate Metrics
-  const totalRevenue = dummyData.transactionRecords.reduce((sum, record) => sum + record.totalRevenue, 0);
-  const totalUsers = dummyData.users.length;
-  const totalSales = dummyData.transactionRecords.length;
-  const activeComplaints = dummyData.complaintTickets.filter(t => t.status === "open").length;
+  import { MessageSquare, Users, Search, Bot, RefreshCw } from "lucide-svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
+
+  let metrics = $state<any>(null);
+  let isLoading = $state(true);
+
+  async function fetchMetrics() {
+    isLoading = true;
+    try {
+      const res = await convex.query(api.admin.getDashboardMetrics, {});
+      if (res) {
+        metrics = res;
+      }
+    } catch (err) {
+      console.warn("Using local fallback dashboard data:", err);
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  onMount(() => {
+    fetchMetrics();
+    const unsubscribe = convex.onUpdate(api.admin.getDashboardMetrics, {}, (updated) => {
+      if (updated) metrics = updated;
+    });
+    return () => unsubscribe();
+  });
+
+  // Calculate Metrics from Convex live data or fallback
+  const totalRevenue = $derived(metrics?.totalRevenue ?? dummyData.transactionRecords.reduce((sum, record) => sum + record.totalRevenue, 0));
+  const totalUsers = $derived(metrics?.totalUsers ?? dummyData.users.length);
+  const totalSales = $derived(metrics?.totalOrders ?? dummyData.transactionRecords.length);
+  const activeComplaints = $derived(metrics?.openTickets ?? dummyData.complaintTickets.filter(t => t.status === "open").length);
 
   // 2. Process Recent Orders
   const recentOrders = dummyData.transactionRecords.map(trans => {
@@ -19,13 +47,13 @@
     let status = "completed";
     if (res) {
         const user = dummyData.users.find(u => u._id === res.customerId);
-        if (user) customerName = user.email.split("@")[0]; // Just the username part
+        if (user) customerName = user.email.split("@")[0];
         status = res.status;
     }
     return {
         id: trans._id,
         customer: customerName,
-        amount: `$${trans.totalRevenue.toFixed(2)}`,
+        amount: `৳${trans.totalRevenue.toFixed(2)}`,
         status: status
     };
   }).slice(0, 5);
