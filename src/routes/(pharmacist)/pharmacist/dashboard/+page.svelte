@@ -17,12 +17,21 @@
     Pill
   } from "lucide-svelte";
   import { toast } from "svelte-sonner";
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
 
-  // Reactive state initialized from dummy data
-  let reservations = $state([...dummyData.reservations]);
+  // Reactive state — live from Convex
+  let reservations = $state<any[]>([]);
   let medicines = $state([...dummyData.medicines]);
-  let users = $state([...dummyData.users]);
   let transactions = $state([...dummyData.transactionRecords]);
+
+  onMount(() => {
+    const unsub = convex.onUpdate(api.reservations.listAllWithDetails, {}, (data) => {
+      reservations = data;
+    });
+    return () => unsub();
+  });
 
   // Derived metrics
   let pendingCount = $derived(reservations.filter(r => r.status === "pending").length);
@@ -30,40 +39,46 @@
   let readyForPickupCount = $derived(reservations.filter(r => r.status === "approved" || r.status === "ready").length);
   let totalRevenue = $derived(transactions.reduce((sum, t) => sum + t.totalRevenue, 0));
   
-  // Interactive quick action to approve a reservation directly from dashboard
-  function quickApprove(id: string) {
-    reservations = reservations.map(r => r._id === id ? { ...r, status: "approved" } : r);
-    toast.success(`Reservation ${id} approved successfully!`);
-  }
-
-  function quickReject(id: string) {
-    reservations = reservations.map(r => r._id === id ? { ...r, status: "cancelled" } : r);
-    toast.info(`Reservation ${id} marked as rejected.`);
-  }
-
-  // Pending reservations detailed list for dashboard
+  // Pending reservations for dashboard table — data is pre-enriched from listAllWithDetails
   let pendingReservations = $derived(
     reservations
       .filter(r => r.status === "pending")
-      .map(r => {
-        const customer = users.find(u => u._id === r.customerId);
-        const medItems = r.medsList.map(item => {
-          const med = medicines.find(m => m._id === item.medicineId);
-          return {
-            name: med ? med.name : item.medicineId,
-            quantity: item.quantity,
-            requiresPrescription: med ? med.requiresPrescription : false
-          };
-        });
-        const needsRx = medItems.some(i => i.requiresPrescription);
-        return {
-          ...r,
-          customerEmail: customer ? customer.email : "Unknown Customer",
-          medItems,
-          needsRx
-        };
-      })
+      .map(r => ({
+        ...r,
+        customerEmail: r.customerEmail || "Unknown Customer",
+        medItems: r.medsList.map((item: any) => ({
+          name: item.medicineName || item.medicineId,
+          quantity: item.quantity,
+          requiresPrescription: item.requiresPrescription || false,
+        })),
+        needsRx: r.hasRxRequired || false,
+      }))
   );
+
+  // Quick actions from dashboard — calls Convex mutations directly
+  async function quickApprove(id: string) {
+    try {
+      await convex.mutation(api.reservations.approve, {
+        reservationId: id as any,
+        pharmacistNote: "Approved from dashboard",
+      });
+      toast.success(`Reservation #${id.slice(-6)} approved!`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to approve.");
+    }
+  }
+
+  async function quickReject(id: string) {
+    try {
+      await convex.mutation(api.reservations.reject, {
+        reservationId: id as any,
+        reason: "Rejected from dashboard quick action",
+      });
+      toast.info(`Reservation #${id.slice(-6)} rejected.`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to reject.");
+    }
+  }
 </script>
 
 <div class="dashboard-container">

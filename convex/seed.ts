@@ -121,6 +121,81 @@ export const seedAll = action({
       });
     }
 
-    return "Successfully seeded customer@medivault.com, pharmacist@medivault.com, and admin@medivault.com (password: password123)";
+    // Seed dummy medicines if table is empty
+    await ctx.runMutation(internal.seed.seedMedicines, {});
+
+    return "Successfully seeded users and medicines!";
   },
 });
+
+export const seedMedicines = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("medicines").collect();
+    if (existing.length > 0) return;
+
+    const medicines = [
+      {
+        name: "Paracetamol 500mg",
+        genericName: "Paracetamol",
+        description: "Pain reliever and fever reducer",
+        imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
+        symptoms: ["headache", "fever", "pain"],
+        requiresPrescription: false,
+        stock: 100,
+        reservedQuantity: 0,
+        unitCostingPrice: 2.5,
+        unitSellingPrice: 5.0,
+        expiryDate: Date.now() + 365 * 24 * 60 * 60 * 1000,
+        conflicts: ["Warfarin"],
+      },
+      {
+        name: "Amoxicillin 250mg",
+        genericName: "Amoxicillin",
+        description: "Penicillin antibiotic for bacterial infections",
+        imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
+        symptoms: ["infection", "fever", "bacterial infection"],
+        requiresPrescription: true,
+        stock: 50,
+        reservedQuantity: 0,
+        unitCostingPrice: 8.0,
+        unitSellingPrice: 15.0,
+        expiryDate: Date.now() + 180 * 24 * 60 * 60 * 1000,
+        conflicts: [],
+      },
+      {
+        name: "Ibuprofen 400mg",
+        genericName: "Ibuprofen",
+        description: "Nonsteroidal anti-inflammatory drug (NSAID)",
+        imageUrl: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
+        symptoms: ["fever", "inflammation", "pain", "headache"],
+        requiresPrescription: false,
+        stock: 200,
+        reservedQuantity: 0,
+        unitCostingPrice: 3.0,
+        unitSellingPrice: 6.5,
+        expiryDate: Date.now() + 300 * 24 * 60 * 60 * 1000,
+        conflicts: ["Paracetamol", "Aspirin"],
+      },
+      {
+        name: "Warfarin 5mg",
+        genericName: "Warfarin",
+        description: "Anticoagulant blood thinner medication",
+        imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
+        symptoms: ["blood clot", "heart condition"],
+        requiresPrescription: true,
+        stock: 40,
+        reservedQuantity: 0,
+        unitCostingPrice: 12.0,
+        unitSellingPrice: 25.0,
+        expiryDate: Date.now() + 200 * 24 * 60 * 60 * 1000,
+        conflicts: ["Paracetamol", "Ibuprofen"],
+      },
+    ];
+
+    for (const med of medicines) {
+      await ctx.db.insert("medicines", med);
+    }
+  },
+});
+

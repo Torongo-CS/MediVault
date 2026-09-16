@@ -454,6 +454,8 @@
         </Card.Header>
         <Card.Content class="space-y-4">
           <div
+            role="region"
+            aria-label="File upload dropzone"
             ondragover={(e: DragEvent) => {
               e.preventDefault();
               isDragOver = true;

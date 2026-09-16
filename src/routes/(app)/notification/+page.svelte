@@ -1,1 +1,5 @@
-<h1>Notification</h1>
+<script lang="ts">
+  import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
+  onMount(() => goto("/notifications", { replaceState: true }));
+</script>
