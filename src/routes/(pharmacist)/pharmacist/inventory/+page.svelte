@@ -7,7 +7,9 @@
   import { Label } from "$lib/components/ui/label";
   import { Textarea } from "$lib/components/ui/textarea";
   import { toast } from "svelte-sonner";
-  import dummyData from "../../../../../convex/dummyData.json";
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
   import { 
     Package, 
     Plus, 
@@ -23,8 +25,8 @@
     Pill
   } from "lucide-svelte";
 
-  // Reactive State initialized from dummyData
-  let medicines = $state([...dummyData.medicines]);
+  // Reactive inventory state — kept in sync with Convex.
+  let medicines = $state<any[]>([]);
   let searchQuery = $state("");
   let selectedFilter = $state("all");
 
@@ -45,6 +47,13 @@
   let formRequiresPrescription = $state(false);
   let formConflicts = $state("");
   let formExpiryDate = $state("2026-12-31");
+
+  onMount(() => {
+    const unsubscribe = convex.onUpdate(api.medicines.list, {}, (data) => {
+      medicines = data;
+    });
+    return unsubscribe;
+  });
 
   // Derived filtered medicines
   let filteredMedicines = $derived(
@@ -67,15 +76,16 @@
   );
 
   // Quick Stock Adjustment
-  function adjustStock(id: string, delta: number) {
-    medicines = medicines.map(m => {
-      if (m._id === id) {
-        const newStock = Math.max(0, m.stock + delta);
-        toast.success(`Updated ${m.name} stock to ${newStock} units`);
-        return { ...m, stock: newStock };
-      }
-      return m;
-    });
+  async function adjustStock(id: string, delta: number) {
+    try {
+      const updated = await convex.mutation(api.medicines.adjustStock, {
+        medicineId: id as any,
+        delta,
+      });
+      toast.success(`Updated ${updated?.name || "Medicine"} stock to ${updated?.stock ?? 0} units`);
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update stock.");
+    }
   }
 
   // Open Form for Adding New Medicine
@@ -111,7 +121,7 @@
   }
 
   // Save Medicine (Add or Edit)
-  function saveMedicine() {
+  async function saveMedicine() {
     if (!formName.trim() || !formGenericName.trim()) {
       toast.error("Medicine Name and Generic Name are required.");
       return;
@@ -121,44 +131,41 @@
     const conflictsArray = formConflicts.split(",").map(c => c.trim()).filter(Boolean);
     const expiryTimestamp = new Date(formExpiryDate).getTime();
 
-    if (editingMedicine) {
-      medicines = medicines.map(m => 
-        m._id === editingMedicine._id 
-          ? { 
-              ...m, 
-              name: formName, 
-              genericName: formGenericName, 
-              description: formDescription, 
-              symptoms: symptomsArray, 
-              stock: formStock, 
-              unitCostingPrice: formCostPrice, 
-              unitSellingPrice: formSellingPrice, 
-              requiresPrescription: formRequiresPrescription, 
-              conflicts: conflictsArray, 
-              expiryDate: expiryTimestamp 
-            } 
-          : m
-      );
-      toast.success(`${formName} updated successfully in inventory!`);
-    } else {
-      const newMed = {
-        _id: `med_${Date.now()}`,
-        name: formName,
-        genericName: formGenericName,
-        description: formDescription,
-        symptoms: symptomsArray,
-        requiresPrescription: formRequiresPrescription,
-        stock: formStock,
-        reservedQuantity: 0,
-        unitCostingPrice: formCostPrice,
-        unitSellingPrice: formSellingPrice,
-        expiryDate: expiryTimestamp,
-        conflicts: conflictsArray
-      };
-      medicines = [newMed, ...medicines];
-      toast.success(`${formName} added to inventory!`);
+    try {
+      if (editingMedicine) {
+        await convex.mutation(api.medicines.update, {
+          medicineId: editingMedicine._id as any,
+          name: formName,
+          genericName: formGenericName,
+          description: formDescription,
+          symptoms: symptomsArray,
+          stock: formStock,
+          unitCostingPrice: formCostPrice,
+          unitSellingPrice: formSellingPrice,
+          requiresPrescription: formRequiresPrescription,
+          conflicts: conflictsArray,
+          expiryDate: expiryTimestamp,
+        });
+        toast.success(`${formName} updated successfully in inventory!`);
+      } else {
+        await convex.mutation(api.medicines.create, {
+          name: formName,
+          genericName: formGenericName,
+          description: formDescription,
+          symptoms: symptomsArray,
+          requiresPrescription: formRequiresPrescription,
+          stock: formStock,
+          unitCostingPrice: formCostPrice,
+          unitSellingPrice: formSellingPrice,
+          expiryDate: expiryTimestamp,
+          conflicts: conflictsArray,
+        });
+        toast.success(`${formName} added to inventory!`);
+      }
+      isFormOpen = false;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save medicine.");
     }
-    isFormOpen = false;
   }
 
   // Delete Medicine Confirmation
@@ -167,12 +174,18 @@
     isDeleteOpen = true;
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (medicineToDelete) {
-      medicines = medicines.filter(m => m._id !== medicineToDelete._id);
-      toast.success(`${medicineToDelete.name} has been removed from inventory.`);
-      isDeleteOpen = false;
-      medicineToDelete = null;
+      try {
+        await convex.mutation(api.medicines.remove, {
+          medicineId: medicineToDelete._id as any,
+        });
+        toast.success(`${medicineToDelete.name} has been removed from inventory.`);
+        isDeleteOpen = false;
+        medicineToDelete = null;
+      } catch (err: any) {
+        toast.error(err.message || "Failed to remove medicine.");
+      }
     }
   }
 
