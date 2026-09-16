@@ -26,11 +26,11 @@
   <Button
     variant="ghost"
     size="icon"
-    class="{compact ? 'h-7 w-7' : 'h-8 w-8'} rounded-none border-r hover:bg-muted"
+    class={(compact ? 'h-7 w-7' : 'h-8 w-8') + " rounded-none border-r hover:bg-muted"}
     onclick={decrement}
     disabled={value <= min}
   >
-    <Minus class="{compact ? 'h-3 w-3' : 'h-3.5 w-3.5'}" />
+    <Minus class={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
   </Button>
 
   <span
@@ -42,10 +42,10 @@
   <Button
     variant="ghost"
     size="icon"
-    class="{compact ? 'h-7 w-7' : 'h-8 w-8'} rounded-none border-l hover:bg-muted"
+    class={(compact ? 'h-7 w-7' : 'h-8 w-8') + " rounded-none border-l hover:bg-muted"}
     onclick={increment}
     disabled={value >= max}
   >
-    <Plus class="{compact ? 'h-3 w-3' : 'h-3.5 w-3.5'}" />
+    <Plus class={compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} />
   </Button>
 </div>
