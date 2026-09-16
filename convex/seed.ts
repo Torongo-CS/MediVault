@@ -3,6 +3,7 @@ import { action, internalAction, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { hashPassword, normalizeEmail } from "./auth";
+import dummyData from "./dummyData.json";
 
 /**
  * Creates (or resets) the single fixed admin account.
@@ -85,117 +86,224 @@ export const upsertAdmin = internalMutation({
 });
 
 /**
- * Seed all test accounts: Customer, Pharmacist, and Admin
+ * Seed all database tables from teammates' dummyData.json
  */
 export const seedAll = action({
   args: {},
   handler: async (ctx) => {
-    const dummyUsers = [
-      {
-        name: "Jane Customer",
-        email: "customer@medivault.com",
-        password: "password123",
-        role: "customer" as const,
-      },
-      {
-        name: "Dr. Alex Pharmacist",
-        email: "pharmacist@medivault.com",
-        password: "password123",
-        role: "pharmacist" as const,
-      },
-      {
-        name: "System Admin",
-        email: "admin@medivault.com",
-        password: "password123",
-        role: "admin" as const,
-      },
-    ];
+    const defaultPasswordHash = await hashPassword("password123");
 
-    for (const u of dummyUsers) {
-      const passwordHash = await hashPassword(u.password);
-      await ctx.runMutation(internal.auth.upsertUser, {
-        name: u.name,
+    const usersToSeed = dummyData.users.map((u) => {
+      let defaultName = "User";
+      if (u.role === "admin") defaultName = "System Admin";
+      else if (u.role === "pharmacist") defaultName = "Dr. Alex Pharmacist";
+      else if (u.email.includes("customer1")) defaultName = "Customer One";
+      else if (u.email.includes("customer2")) defaultName = "Customer Two";
+
+      return {
+        dummyId: u._id,
+        name: defaultName,
+        role: u.role as "admin" | "pharmacist" | "customer",
         email: u.email,
-        passwordHash,
-        role: u.role,
+        passwordHash: defaultPasswordHash,
+        imageUrl: u.imageUrl,
+        isActive: u.isActive,
+      };
+    });
+
+    if (!usersToSeed.some((u) => u.email === "customer@medivault.com")) {
+      usersToSeed.push({
+        dummyId: "user_customer_default",
+        name: "Jane Customer",
+        role: "customer",
+        email: "customer@medivault.com",
+        passwordHash: defaultPasswordHash,
+        imageUrl: undefined,
+        isActive: true,
       });
     }
 
-    // Seed dummy medicines if table is empty
-    await ctx.runMutation(internal.seed.seedMedicines, {});
+    await ctx.runMutation(internal.seed.seedFromDummyData, {
+      users: usersToSeed,
+    });
 
-    return "Successfully seeded users and medicines!";
+    return "Successfully seeded database from dummyData.json with accounts: admin@medivault.com, pharmacist@medivault.com, customer1@gmail.com, customer2@gmail.com, customer@medivault.com (password: password123)";
   },
 });
 
-export const seedMedicines = internalMutation({
-  args: {},
-  handler: async (ctx) => {
-    const existing = await ctx.db.query("medicines").collect();
-    if (existing.length > 0) return;
+export const seedFromDummyData = internalMutation({
+  args: {
+    users: v.array(
+      v.object({
+        dummyId: v.string(),
+        name: v.string(),
+        role: v.union(v.literal("admin"), v.literal("pharmacist"), v.literal("customer")),
+        email: v.string(),
+        passwordHash: v.string(),
+        imageUrl: v.optional(v.string()),
+        isActive: v.boolean(),
+      })
+    ),
+  },
+  handler: async (ctx, args) => {
+    const tablesToWipe = [
+      "transactionRecords",
+      "notifications",
+      "complaintMessages",
+      "complaintTickets",
+      "favorites",
+      "prescriptions",
+      "reservations",
+      "medicines",
+      "users",
+    ] as const;
 
-    const medicines = [
-      {
-        name: "Paracetamol 500mg",
-        genericName: "Paracetamol",
-        description: "Pain reliever and fever reducer",
-        imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
-        symptoms: ["headache", "fever", "pain"],
-        requiresPrescription: false,
-        stock: 100,
-        reservedQuantity: 0,
-        unitCostingPrice: 2.5,
-        unitSellingPrice: 5.0,
-        expiryDate: Date.now() + 365 * 24 * 60 * 60 * 1000,
-        conflicts: ["Warfarin"],
-      },
-      {
-        name: "Amoxicillin 250mg",
-        genericName: "Amoxicillin",
-        description: "Penicillin antibiotic for bacterial infections",
-        imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
-        symptoms: ["infection", "fever", "bacterial infection"],
-        requiresPrescription: true,
-        stock: 50,
-        reservedQuantity: 0,
-        unitCostingPrice: 8.0,
-        unitSellingPrice: 15.0,
-        expiryDate: Date.now() + 180 * 24 * 60 * 60 * 1000,
-        conflicts: [],
-      },
-      {
-        name: "Ibuprofen 400mg",
-        genericName: "Ibuprofen",
-        description: "Nonsteroidal anti-inflammatory drug (NSAID)",
-        imageUrl: "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
-        symptoms: ["fever", "inflammation", "pain", "headache"],
-        requiresPrescription: false,
-        stock: 200,
-        reservedQuantity: 0,
-        unitCostingPrice: 3.0,
-        unitSellingPrice: 6.5,
-        expiryDate: Date.now() + 300 * 24 * 60 * 60 * 1000,
-        conflicts: ["Paracetamol", "Aspirin"],
-      },
-      {
-        name: "Warfarin 5mg",
-        genericName: "Warfarin",
-        description: "Anticoagulant blood thinner medication",
-        imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
-        symptoms: ["blood clot", "heart condition"],
-        requiresPrescription: true,
-        stock: 40,
-        reservedQuantity: 0,
-        unitCostingPrice: 12.0,
-        unitSellingPrice: 25.0,
-        expiryDate: Date.now() + 200 * 24 * 60 * 60 * 1000,
-        conflicts: ["Paracetamol", "Ibuprofen"],
-      },
-    ];
-
-    for (const med of medicines) {
-      await ctx.db.insert("medicines", med);
+    for (const table of tablesToWipe) {
+      const docs = await ctx.db.query(table).collect();
+      for (const doc of docs) {
+        await ctx.db.delete(doc._id);
+      }
     }
+
+    const userIdMap: Record<string, Id<"users">> = {};
+    for (const u of args.users) {
+      const insertedId = await ctx.db.insert("users", {
+        name: u.name,
+        role: u.role,
+        email: normalizeEmail(u.email),
+        passwordHash: u.passwordHash,
+        imageUrl: u.imageUrl,
+        isActive: u.isActive,
+      });
+      userIdMap[u.dummyId] = insertedId;
+    }
+
+    const medIdMap: Record<string, Id<"medicines">> = {};
+    for (const med of dummyData.medicines) {
+      const insertedId = await ctx.db.insert("medicines", {
+        name: med.name,
+        genericName: med.genericName,
+        description: med.description,
+        imageUrl: med.imageUrl,
+        symptoms: med.symptoms,
+        requiresPrescription: med.requiresPrescription,
+        stock: med.stock,
+        reservedQuantity: med.reservedQuantity,
+        unitCostingPrice: med.unitCostingPrice,
+        unitSellingPrice: med.unitSellingPrice,
+        expiryDate: med.expiryDate,
+        conflicts: med.conflicts,
+      });
+      medIdMap[med._id] = insertedId;
+    }
+
+    const reservationIdMap: Record<string, Id<"reservations">> = {};
+    for (const res of dummyData.reservations) {
+      const customerId = userIdMap[res.customerId];
+      if (!customerId) continue;
+      const pharmacistId = res.pharmacistId ? userIdMap[res.pharmacistId] : undefined;
+
+      const insertedId = await ctx.db.insert("reservations", {
+        customerId,
+        pharmacistId,
+        medsList: res.medsList.map((item) => ({
+          medicineId: medIdMap[item.medicineId] ?? item.medicineId,
+          quantity: item.quantity,
+        })),
+        totalUnitsRequested: res.totalUnitsRequested,
+        totalCosting: res.totalCosting,
+        createdAt: res.createdAt,
+        pickupDate: res.pickupDate,
+        prescriptionImageUrl: res.prescriptionImageUrl,
+        status: res.status as "pending" | "approved" | "completed" | "cancelled",
+      });
+      reservationIdMap[res._id] = insertedId;
+    }
+
+    for (const pres of dummyData.prescriptions) {
+      const userId = userIdMap[pres.userId];
+      if (!userId) continue;
+
+      await ctx.db.insert("prescriptions", {
+        name: pres.name,
+        dateUploaded: pres.dateUploaded,
+        imageUrl: pres.imageUrl,
+        userId,
+      });
+    }
+
+    for (const fav of dummyData.favorites) {
+      const customerId = userIdMap[fav.customerId];
+      const pharmacistId = userIdMap[fav.pharmacistId];
+      if (!customerId || !pharmacistId) continue;
+
+      await ctx.db.insert("favorites", {
+        customerId,
+        pharmacistId,
+      });
+    }
+
+    const ticketIdMap: Record<string, Id<"complaintTickets">> = {};
+    for (const ticket of dummyData.complaintTickets) {
+      const creatorId = userIdMap[ticket.creatorId];
+      if (!creatorId) continue;
+
+      const insertedId = await ctx.db.insert("complaintTickets", {
+        creatorId,
+        title: ticket.title,
+        status: ticket.status as "open" | "resolved",
+        createdAt: ticket.createdAt,
+        updatedAt: ticket.updatedAt,
+      });
+      ticketIdMap[ticket._id] = insertedId;
+    }
+
+    for (const msg of dummyData.complaintMessages) {
+      const ticketId = ticketIdMap[msg.ticketId];
+      const senderId = userIdMap[msg.senderId];
+      if (!ticketId || !senderId) continue;
+
+      await ctx.db.insert("complaintMessages", {
+        ticketId,
+        senderId,
+        message: msg.message,
+        timestamp: msg.timestamp,
+      });
+    }
+
+    for (const notif of dummyData.notifications) {
+      const senderId = userIdMap[notif.senderId];
+      const receiverId = userIdMap[notif.receiverId];
+      if (!senderId || !receiverId) continue;
+
+      await ctx.db.insert("notifications", {
+        senderId,
+        receiverId,
+        message: notif.message,
+        isRead: notif.isRead,
+        timestamp: notif.timestamp,
+      });
+    }
+
+    for (const trans of dummyData.transactionRecords) {
+      const reservationId = reservationIdMap[trans.reservationId];
+      if (!reservationId) continue;
+
+      await ctx.db.insert("transactionRecords", {
+        reservationId,
+        completedAt: trans.completedAt,
+        itemsSnapshot: trans.itemsSnapshot.map((item) => ({
+          medicineId: medIdMap[item.medicineId] ?? item.medicineId,
+          quantity: item.quantity,
+          unitCostingPriceAtSale: item.unitCostingPriceAtSale,
+          unitSellingPriceAtSale: item.unitSellingPriceAtSale,
+        })),
+        totalRevenue: trans.totalRevenue,
+      });
+    }
+
+    return "Database successfully seeded from dummyData.json!";
   },
 });
+
 
