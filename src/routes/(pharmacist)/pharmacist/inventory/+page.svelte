@@ -7,7 +7,9 @@
   import { Label } from "$lib/components/ui/label";
   import { Textarea } from "$lib/components/ui/textarea";
   import { toast } from "svelte-sonner";
-  import dummyData from "../../../../../convex/dummyData.json";
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
   import { 
     Package, 
     Plus, 
@@ -62,6 +64,13 @@
   let formRequiresPrescription = $state(false);
   let formConflicts = $state("");
   let formExpiryDate = $state("2026-12-31");
+
+  onMount(() => {
+    const unsubscribe = convex.onUpdate(api.medicines.list, {}, (data) => {
+      medicines = data;
+    });
+    return unsubscribe;
+  });
 
   // Derived filtered medicines
   let filteredMedicines = $derived(
