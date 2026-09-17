@@ -25,10 +25,27 @@
     Pill
   } from "lucide-svelte";
 
-  // Reactive inventory state — kept in sync with Convex.
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
+
+  let { data } = $props();
+
+  // Reactive State
   let medicines = $state<any[]>([]);
   let searchQuery = $state("");
   let selectedFilter = $state("all");
+
+  onMount(() => {
+    const unsub = convex.onUpdate(
+      api.medicines.listByPharmacist,
+      { pharmacistId: data?.user?._id as any },
+      (liveMeds) => {
+        if (liveMeds) medicines = liveMeds;
+      }
+    );
+    return () => unsub();
+  });
 
   // Modal / Form state
   let isFormOpen = $state(false);
@@ -78,13 +95,13 @@
   // Quick Stock Adjustment
   async function adjustStock(id: string, delta: number) {
     try {
-      const updated = await convex.mutation(api.medicines.adjustStock, {
+      await convex.mutation(api.medicines.adjustStock, {
         medicineId: id as any,
         delta,
       });
-      toast.success(`Updated ${updated?.name || "Medicine"} stock to ${updated?.stock ?? 0} units`);
+      toast.success("Stock updated in database!");
     } catch (err: any) {
-      toast.error(err.message || "Failed to update stock.");
+      toast.error(err.message || "Failed to adjust stock");
     }
   }
 
@@ -133,7 +150,7 @@
 
     try {
       if (editingMedicine) {
-        await convex.mutation(api.medicines.update, {
+        await convex.mutation(api.medicines.updateMedicine, {
           medicineId: editingMedicine._id as any,
           name: formName,
           genericName: formGenericName,
@@ -146,9 +163,14 @@
           conflicts: conflictsArray,
           expiryDate: expiryTimestamp,
         });
-        toast.success(`${formName} updated successfully in inventory!`);
+        toast.success(`${formName} updated successfully in database!`);
       } else {
-        await convex.mutation(api.medicines.create, {
+        if (!data?.user?._id) {
+          toast.error("You must be logged in as a pharmacist to add medicines.");
+          return;
+        }
+        await convex.mutation(api.medicines.createMedicine, {
+          pharmacistId: data.user._id as any,
           name: formName,
           genericName: formGenericName,
           description: formDescription,
@@ -160,11 +182,11 @@
           expiryDate: expiryTimestamp,
           conflicts: conflictsArray,
         });
-        toast.success(`${formName} added to inventory!`);
+        toast.success(`${formName} added to database inventory!`);
       }
       isFormOpen = false;
     } catch (err: any) {
-      toast.error(err.message || "Failed to save medicine.");
+      toast.error(err.message || "Failed to save medicine");
     }
   }
 
@@ -177,14 +199,14 @@
   async function confirmDelete() {
     if (medicineToDelete) {
       try {
-        await convex.mutation(api.medicines.remove, {
+        await convex.mutation(api.medicines.deleteMedicine, {
           medicineId: medicineToDelete._id as any,
         });
-        toast.success(`${medicineToDelete.name} has been removed from inventory.`);
+        toast.success(`${medicineToDelete.name} has been removed from database.`);
         isDeleteOpen = false;
         medicineToDelete = null;
       } catch (err: any) {
-        toast.error(err.message || "Failed to remove medicine.");
+        toast.error(err.message || "Failed to delete medicine");
       }
     }
   }

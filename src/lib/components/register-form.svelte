@@ -41,12 +41,17 @@
 				class="p-6 md:p-8"
 				use:enhance={() => {
 					submitting = true;
-					return async ({ update }) => {
-						await update();
+					return async ({ update, result }) => {
 						submitting = false;
+						if (result.type === 'redirect') {
+							window.location.href = result.location;
+						} else {
+							await update();
+						}
 					};
 				}}
 			>
+				<input type="hidden" name="role" value={role} />
 				<FieldGroup>
 					<div class="flex flex-col items-center gap-2 text-center">
 						<h1 class="text-2xl font-bold">Create an account</h1>

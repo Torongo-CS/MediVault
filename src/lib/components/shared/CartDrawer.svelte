@@ -24,10 +24,13 @@
   function handleClear() {
     cart.clearCart();
     pickupDate = "";
+    prescriptionImageUrl = "";
   }
 
   // Pickup date — minimum is tomorrow
   let pickupDate = $state("");
+  let prescriptionImageUrl = $state("");
+
   const tomorrowStr = $derived.by(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
@@ -39,6 +42,11 @@
   async function handleCheckout() {
     if (!pickupDate) {
       toast.error("Please select a valid pickup date.");
+      return;
+    }
+
+    if (cart.needsPrescription && !prescriptionImageUrl) {
+      toast.error("Please attach your doctor's prescription before placing this reservation.");
       return;
     }
 
@@ -54,8 +62,10 @@
 
       await convex.mutation(api.reservations.create, {
         customerEmail: "customer@medivault.com",
+        pharmacistId: cart.pharmacyId as any,
         medsList,
         pickupDate: pickupTimestamp,
+        prescriptionImageUrl: prescriptionImageUrl || undefined,
       });
 
       toast.success(
@@ -63,6 +73,7 @@
       );
       cart.clearCart();
       pickupDate = "";
+      prescriptionImageUrl = "";
       cart.close();
     } catch (err: any) {
       toast.error(
@@ -73,7 +84,11 @@
     }
   }
 
-  const canSubmit = $derived(pickupDate.length > 0 && !isSubmitting);
+  const canSubmit = $derived(
+    pickupDate.length > 0 &&
+      (!cart.needsPrescription || prescriptionImageUrl.length > 0) &&
+      !isSubmitting
+  );
 
   const conflictWarnings = $derived.by(() => {
     const generics = cart.items.map((i) => i.genericName.toLowerCase());
@@ -218,29 +233,48 @@
           </div>
         {/if}
 
-        {#if cart.needsPrescription}
-          <div class="cart-footer__rx-alert">
+        <div class="cart-footer__rx-alert bg-amber-500/10 border border-amber-500/30 p-3 rounded-lg space-y-2">
+          <div class="flex items-start gap-2">
             <AlertTriangle
               class="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
             />
             <div class="flex-1 min-w-0">
               <p
-                class="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed"
+                class="text-[11px] text-amber-700 dark:text-amber-300 font-semibold leading-relaxed"
               >
-                Some items require a prescription. Attach one from your vault
-                before checkout.
+                {cart.needsPrescription ? "Prescription Mandatory for this Order" : "Attach Prescription (Optional)"}
               </p>
-              <a
-                href="/prescriptions"
-                class="inline-flex items-center gap-1 mt-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300 hover:underline"
-                onclick={() => (cart.isOpen = false)}
-              >
-                <FileText class="h-3 w-3" />
-                Go to Prescription Vault
-              </a>
+              <p class="text-[10px] text-muted-foreground">
+                Upload your doctor's prescription file so the pharmacist can verify.
+              </p>
             </div>
           </div>
-        {/if}
+
+          <div class="space-y-1.5 pt-1">
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              class="text-xs w-full file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 cursor-pointer"
+              onchange={(e) => {
+                const file = (e.target as HTMLInputElement).files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (evt) => {
+                    prescriptionImageUrl = evt.target?.result as string;
+                    toast.success("Prescription file attached!");
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+            {#if prescriptionImageUrl}
+              <div class="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                <FileText class="h-3.5 w-3.5" />
+                Prescription document attached!
+              </div>
+            {/if}
+          </div>
+        </div>
 
         <!-- Pickup Date Picker -->
         <div class="cart-pickup-date">

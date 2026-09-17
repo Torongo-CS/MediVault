@@ -8,13 +8,26 @@
   import * as Select from "$lib/components/ui/select";
   import { Search, SlidersHorizontal, Store } from "lucide-svelte";
 
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../convex/_generated/api";
+
   // Search & filter state
   let searchQuery = $state("");
   let sortBy = $state("name-asc");
   let showFavoritesOnly = $state(false);
 
-  // Track favorites locally (will connect to Convex later)
-  let favoriteIds = $state<Set<string>>(new Set(["ph-2", "ph-5"]));
+  let favoriteIds = $state<Set<string>>(new Set());
+  let pharmaciesList = $state<any[]>([]);
+
+  onMount(() => {
+    const unsub = convex.onUpdate(api.users.listPharmacies, {}, (data) => {
+      if (data && data.length > 0) {
+        pharmaciesList = data;
+      }
+    });
+    return () => unsub();
+  });
 
   function toggleFavorite(id: string) {
     const next = new Set(favoriteIds);
@@ -26,57 +39,18 @@
     favoriteIds = next;
   }
 
-  // Mock pharmacy data — will be replaced with Convex query
-  const pharmacies = [
-    {
-      id: "ph-1",
-      name: "HealthPlus Pharmacy",
-      address: "42 Mirpur Road, Dhaka 1205",
-      phone: "+880 1712-345678",
-      description: "Your trusted neighborhood pharmacy with 24/7 service and competitive prices.",
-    },
-    {
-      id: "ph-2",
-      name: "CarePoint Medical Store",
-      address: "15 Gulshan Avenue, Dhaka 1212",
-      phone: "+880 1898-765432",
-      description: "Premium pharmacy specializing in imported medicines and healthcare products.",
-    },
-    {
-      id: "ph-3",
-      name: "MediCare Pharmacy",
-      address: "7 Dhanmondi R/A, Dhaka 1209",
-      phone: "+880 1555-112233",
-      description: "Family-owned pharmacy serving the community for over 20 years.",
-    },
-    {
-      id: "ph-4",
-      name: "Green Cross Dispensary",
-      address: "89 Banani Model Town, Dhaka 1213",
-      phone: "+880 1678-998877",
-      description: "Modern dispensary with digital prescription management and home delivery.",
-    },
-    {
-      id: "ph-5",
-      name: "University Health Center",
-      address: "BUET Campus, Polashi, Dhaka 1000",
-      phone: "+880 1911-445566",
-      description: "Campus health center providing affordable medicines for students and staff.",
-    },
-    {
-      id: "ph-6",
-      name: "Lazz Pharma",
-      address: "156 Motijheel C/A, Dhaka 1000",
-      phone: "+880 1811-223344",
-      description: "One of the largest pharmacy chains in Bangladesh with extensive stock.",
-    },
-  ];
-
   // Filtered & sorted pharmacies
   const filteredPharmacies = $derived(() => {
-    let results = [...pharmacies];
+    let results = pharmaciesList.map((p) => ({
+      id: p._id,
+      name: p.name,
+      address: p.address,
+      phone: p.phone,
+      description: p.description,
+      operatingHours: p.operatingHours,
+      rating: p.rating,
+    }));
 
-    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       results = results.filter(
@@ -87,12 +61,10 @@
       );
     }
 
-    // Favorites filter
     if (showFavoritesOnly) {
       results = results.filter((p) => favoriteIds.has(p.id));
     }
 
-    // Sort
     if (sortBy === "name-asc") {
       results.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortBy === "name-desc") {

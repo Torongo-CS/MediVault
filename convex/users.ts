@@ -45,6 +45,32 @@ export const listUsersByRole = query({
 });
 
 /**
+ * List all active pharmacy shops for customer portal browsing
+ */
+export const listPharmacies = query({
+  args: {},
+  handler: async (ctx) => {
+    const pharmacists = await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "pharmacist"))
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    return pharmacists.map((p) => ({
+      _id: p._id,
+      name: p.shopName || p.name || "Pharmacy Shop",
+      pharmacistName: p.name || "Dr. Pharmacist",
+      address: p.shopAddress || "Dhaka, Bangladesh",
+      phone: p.phone || "+880 1700-000000",
+      operatingHours: p.operatingHours || "09:00 AM - 10:00 PM",
+      description: p.description || "Licensed pharmacy store providing genuine medicines.",
+      imageUrl: p.imageUrl,
+      rating: p.rating ?? 4.8,
+    }));
+  },
+});
+
+/**
  * Update profile details (name, phone, imageUrl)
  */
 export const updateProfile = mutation({

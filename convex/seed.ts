@@ -93,21 +93,23 @@ export const seedAll = action({
   handler: async (ctx) => {
     const defaultPasswordHash = await hashPassword("password123");
 
-    const usersToSeed = dummyData.users.map((u) => {
-      let defaultName = "User";
-      if (u.role === "admin") defaultName = "System Admin";
-      else if (u.role === "pharmacist") defaultName = "Dr. Alex Pharmacist";
-      else if (u.email.includes("customer1")) defaultName = "Customer One";
-      else if (u.email.includes("customer2")) defaultName = "Customer Two";
+    const usersToSeed: any[] = dummyData.users.map((u) => {
+      let defaultName = u.name || "User";
 
       return {
         dummyId: u._id,
         name: defaultName,
         role: u.role as "admin" | "pharmacist" | "customer",
         email: u.email,
+        phone: u.phone,
         passwordHash: defaultPasswordHash,
         imageUrl: u.imageUrl,
         isActive: u.isActive,
+        shopName: u.shopName,
+        shopAddress: u.shopAddress,
+        operatingHours: u.operatingHours,
+        description: u.description,
+        rating: u.rating,
       };
     });
 
@@ -118,7 +120,6 @@ export const seedAll = action({
         role: "customer",
         email: "customer@medivault.com",
         passwordHash: defaultPasswordHash,
-        imageUrl: undefined,
         isActive: true,
       });
     }
@@ -127,7 +128,7 @@ export const seedAll = action({
       users: usersToSeed,
     });
 
-    return "Successfully seeded database from dummyData.json with accounts: admin@medivault.com, pharmacist@medivault.com, customer1@gmail.com, customer2@gmail.com, customer@medivault.com (password: password123)";
+    return "Successfully seeded database from dummyData.json with accounts: admin@medivault.com, pharmacist@medivault.com, carepoint@medivault.com, medicare@medivault.com, greencross@medivault.com, lazzpharma@medivault.com (password: password123)";
   },
 });
 
@@ -139,9 +140,15 @@ export const seedFromDummyData = internalMutation({
         name: v.string(),
         role: v.union(v.literal("admin"), v.literal("pharmacist"), v.literal("customer")),
         email: v.string(),
+        phone: v.optional(v.string()),
         passwordHash: v.string(),
         imageUrl: v.optional(v.string()),
         isActive: v.boolean(),
+        shopName: v.optional(v.string()),
+        shopAddress: v.optional(v.string()),
+        operatingHours: v.optional(v.string()),
+        description: v.optional(v.string()),
+        rating: v.optional(v.number()),
       })
     ),
   },
@@ -171,15 +178,22 @@ export const seedFromDummyData = internalMutation({
         name: u.name,
         role: u.role,
         email: normalizeEmail(u.email),
+        phone: u.phone,
         passwordHash: u.passwordHash,
         imageUrl: u.imageUrl,
         isActive: u.isActive,
+        shopName: u.shopName,
+        shopAddress: u.shopAddress,
+        operatingHours: u.operatingHours,
+        description: u.description,
+        rating: u.rating,
       });
       userIdMap[u.dummyId] = insertedId;
     }
 
     const medIdMap: Record<string, Id<"medicines">> = {};
     for (const med of dummyData.medicines) {
+      const pharmacistId = med.pharmacistId ? userIdMap[med.pharmacistId] : undefined;
       const insertedId = await ctx.db.insert("medicines", {
         name: med.name,
         genericName: med.genericName,
@@ -193,6 +207,7 @@ export const seedFromDummyData = internalMutation({
         unitSellingPrice: med.unitSellingPrice,
         expiryDate: med.expiryDate,
         conflicts: med.conflicts,
+        pharmacistId,
       });
       medIdMap[med._id] = insertedId;
     }

@@ -18,7 +18,8 @@
     | "expired"
     | "ready"
     | "delivered"
-    | "cancelled";
+    | "cancelled"
+    | "completed";
 
   interface Props {
     status: ReservationStatus;
@@ -50,6 +51,11 @@
       label: "Delivered",
       color: "bg-slate-500/15 text-slate-700 dark:text-slate-400 border-slate-500/30",
       icon: Truck,
+    },
+    completed: {
+      label: "Completed",
+      color: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
+      icon: CheckCircle2,
     },
     rejected: {
       label: "Rejected",

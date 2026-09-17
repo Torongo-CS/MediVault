@@ -13,7 +13,7 @@
 		"test:unit": "vitest",
 		"test": "bun run test:unit --run && bun run test:e2e",
 		"test:e2e": "playwright install && playwright test",
-		"setup": "powershell -ExecutionPolicy Bypass -File ./script/setup.ps1",
+		"setup": "bun run ./script/setup.js",
 		"seed": "bunx convex run seed:seedAll"
 	},
 	"devDependencies": {
