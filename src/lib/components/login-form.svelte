@@ -37,9 +37,13 @@
         class="flex flex-col justify-center p-6 md:p-8"
         use:enhance={() => {
           submitting = true;
-          return async ({ update }) => {
-            await update();
+          return async ({ update, result }) => {
             submitting = false;
+            if (result.type === 'redirect') {
+              window.location.href = result.location;
+            } else {
+              await update();
+            }
           };
         }}
       >

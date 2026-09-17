@@ -2,32 +2,105 @@
   "users": [
     {
       "_id": "user_1",
+      "name": "System Admin",
       "role": "admin",
       "email": "admin@medivault.com",
       "passwordHash": "hashed_pass_1",
-      "imageUrl": "https://example.com/admin.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
       "isActive": true
     },
     {
       "_id": "user_2",
+      "name": "Dr. Alex Pharmacist",
       "role": "pharmacist",
       "email": "pharmacist@medivault.com",
+      "phone": "+880 1712-345678",
       "passwordHash": "hashed_pass_2",
-      "isActive": true
+      "imageUrl": "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150",
+      "isActive": true,
+      "shopName": "HealthPlus Pharmacy",
+      "shopAddress": "42 Mirpur Road, Dhanmondi, Dhaka 1205",
+      "operatingHours": "08:00 AM - 11:00 PM",
+      "description": "Your trusted neighborhood pharmacy with 24/7 emergency service and competitive prices.",
+      "rating": 4.9
+    },
+    {
+      "_id": "user_ph_2",
+      "name": "Dr. Sarah Rahman",
+      "role": "pharmacist",
+      "email": "carepoint@medivault.com",
+      "phone": "+880 1898-765432",
+      "passwordHash": "hashed_pass_ph2",
+      "imageUrl": "https://images.unsplash.com/photo-1594824813566-88855ce78905?w=150",
+      "isActive": true,
+      "shopName": "CarePoint Medical Store",
+      "shopAddress": "15 Gulshan Avenue, Dhaka 1212",
+      "operatingHours": "09:00 AM - 10:00 PM",
+      "description": "Premium pharmacy specializing in imported medicines, cardiac care, and health supplements.",
+      "rating": 4.8
+    },
+    {
+      "_id": "user_ph_3",
+      "name": "Dr. Tanvir Ahmed",
+      "role": "pharmacist",
+      "email": "medicare@medivault.com",
+      "phone": "+880 1555-112233",
+      "passwordHash": "hashed_pass_ph3",
+      "imageUrl": "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=150",
+      "isActive": true,
+      "shopName": "MediCare Family Pharmacy",
+      "shopAddress": "7 Dhanmondi R/A, Dhaka 1209",
+      "operatingHours": "08:30 AM - 10:30 PM",
+      "description": "Family-owned pharmacy serving the community for over 20 years with expert clinical consultation.",
+      "rating": 4.7
+    },
+    {
+      "_id": "user_ph_4",
+      "name": "Dr. Nusrat Jahan",
+      "role": "pharmacist",
+      "email": "greencross@medivault.com",
+      "phone": "+880 1678-998877",
+      "passwordHash": "hashed_pass_ph4",
+      "imageUrl": "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=150",
+      "isActive": true,
+      "shopName": "Green Cross Dispensary",
+      "shopAddress": "89 Banani Model Town, Dhaka 1213",
+      "operatingHours": "09:00 AM - 11:00 PM",
+      "description": "Modern dispensary with digital prescription vault management and superfast home delivery.",
+      "rating": 4.9
+    },
+    {
+      "_id": "user_ph_5",
+      "name": "Dr. Mahfuz Khan",
+      "role": "pharmacist",
+      "email": "lazzpharma@medivault.com",
+      "phone": "+880 1811-223344",
+      "passwordHash": "hashed_pass_ph5",
+      "imageUrl": "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=150",
+      "isActive": true,
+      "shopName": "Lazz Pharma Motijheel",
+      "shopAddress": "156 Motijheel C/A, Dhaka 1000",
+      "operatingHours": "24 Hours",
+      "description": "One of the largest trusted pharmacy chains in Bangladesh with extensive medicine inventory.",
+      "rating": 4.8
     },
     {
       "_id": "user_3",
+      "name": "Customer One",
       "role": "customer",
       "email": "customer1@gmail.com",
       "passwordHash": "hashed_pass_3",
+      "imageUrl": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
       "isActive": true
     },
     {
       "_id": "user_4",
+      "name": "Customer Two",
       "role": "customer",
       "email": "customer2@gmail.com",
       "passwordHash": "hashed_pass_4",
-      "isActive": false
+      "imageUrl": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+      "isActive": true
     }
   ],
   "medicines": [
@@ -36,43 +109,160 @@
       "name": "Paracetamol 500mg",
       "genericName": "Paracetamol",
       "description": "Pain reliever and fever reducer",
-      "imageUrl": "https://example.com/para.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
       "symptoms": ["headache", "fever", "pain"],
       "requiresPrescription": false,
-      "stock": 100,
+      "stock": 150,
       "reservedQuantity": 10,
       "unitCostingPrice": 2.5,
       "unitSellingPrice": 5.0,
-      "expiryDate": 1735689600000,
-      "conflicts": ["Warfarin"]
+      "expiryDate": 1775689600000,
+      "conflicts": ["Warfarin"],
+      "pharmacistId": "user_2"
     },
     {
       "_id": "med_2",
       "name": "Amoxicillin 250mg",
       "genericName": "Amoxicillin",
-      "description": "Penicillin antibiotic",
-      "symptoms": ["infection"],
+      "description": "Penicillin antibiotic for bacterial infections",
+      "imageUrl": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
+      "symptoms": ["infection", "fever"],
       "requiresPrescription": true,
-      "stock": 50,
-      "reservedQuantity": 0,
+      "stock": 45,
+      "reservedQuantity": 5,
       "unitCostingPrice": 8.0,
       "unitSellingPrice": 15.0,
-      "expiryDate": 1735689600000,
-      "conflicts": []
+      "expiryDate": 1775689600000,
+      "conflicts": [],
+      "pharmacistId": "user_2"
     },
     {
       "_id": "med_3",
       "name": "Ibuprofen 400mg",
       "genericName": "Ibuprofen",
       "description": "Nonsteroidal anti-inflammatory drug",
+      "imageUrl": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
       "symptoms": ["fever", "inflammation", "pain"],
       "requiresPrescription": false,
       "stock": 200,
-      "reservedQuantity": 50,
+      "reservedQuantity": 20,
       "unitCostingPrice": 3.0,
       "unitSellingPrice": 6.5,
-      "expiryDate": 1735689600000,
-      "conflicts": ["Aspirin"]
+      "expiryDate": 1775689600000,
+      "conflicts": ["Aspirin"],
+      "pharmacistId": "user_2"
+    },
+    {
+      "_id": "med_cp_1",
+      "name": "Paracetamol Extra 650mg",
+      "genericName": "Paracetamol",
+      "description": "Extra strength pain and fever relief",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
+      "symptoms": ["headache", "fever", "severe pain"],
+      "requiresPrescription": false,
+      "stock": 90,
+      "reservedQuantity": 5,
+      "unitCostingPrice": 2.8,
+      "unitSellingPrice": 5.5,
+      "expiryDate": 1775689600000,
+      "conflicts": ["Warfarin"],
+      "pharmacistId": "user_ph_2"
+    },
+    {
+      "_id": "med_cp_2",
+      "name": "Azithromycin 500mg",
+      "genericName": "Azithromycin",
+      "description": "Macrolide antibiotic for respiratory infections",
+      "imageUrl": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
+      "symptoms": ["cough", "fever", "infection"],
+      "requiresPrescription": true,
+      "stock": 30,
+      "reservedQuantity": 2,
+      "unitCostingPrice": 10.0,
+      "unitSellingPrice": 18.0,
+      "expiryDate": 1775689600000,
+      "conflicts": [],
+      "pharmacistId": "user_ph_2"
+    },
+    {
+      "_id": "med_cp_3",
+      "name": "Warfarin 5mg",
+      "genericName": "Warfarin",
+      "description": "Anticoagulant blood thinner medication",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
+      "symptoms": ["blood clot", "heart condition"],
+      "requiresPrescription": true,
+      "stock": 40,
+      "reservedQuantity": 0,
+      "unitCostingPrice": 12.0,
+      "unitSellingPrice": 25.0,
+      "expiryDate": 1775689600000,
+      "conflicts": ["Paracetamol", "Ibuprofen"],
+      "pharmacistId": "user_ph_2"
+    },
+    {
+      "_id": "med_mc_1",
+      "name": "Metformin 500mg",
+      "genericName": "Metformin",
+      "description": "Oral diabetes medicine for blood sugar control",
+      "imageUrl": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
+      "symptoms": ["diabetes", "high blood sugar"],
+      "requiresPrescription": true,
+      "stock": 120,
+      "reservedQuantity": 10,
+      "unitCostingPrice": 4.0,
+      "unitSellingPrice": 7.5,
+      "expiryDate": 1775689600000,
+      "conflicts": [],
+      "pharmacistId": "user_ph_3"
+    },
+    {
+      "_id": "med_mc_2",
+      "name": "Cetirizine 10mg",
+      "genericName": "Cetirizine",
+      "description": "Antihistamine for allergy, sneezing, and runny nose",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
+      "symptoms": ["allergy", "runny nose", "sneezing"],
+      "requiresPrescription": false,
+      "stock": 180,
+      "reservedQuantity": 15,
+      "unitCostingPrice": 2.0,
+      "unitSellingPrice": 4.0,
+      "expiryDate": 1775689600000,
+      "conflicts": [],
+      "pharmacistId": "user_ph_3"
+    },
+    {
+      "_id": "med_gc_1",
+      "name": "Losartan 50mg",
+      "genericName": "Losartan",
+      "description": "Angiotensin II receptor blocker for high blood pressure",
+      "imageUrl": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
+      "symptoms": ["hypertension", "high blood pressure"],
+      "requiresPrescription": true,
+      "stock": 85,
+      "reservedQuantity": 5,
+      "unitCostingPrice": 6.0,
+      "unitSellingPrice": 11.0,
+      "expiryDate": 1775689600000,
+      "conflicts": [],
+      "pharmacistId": "user_ph_4"
+    },
+    {
+      "_id": "med_lz_1",
+      "name": "Pantoprazole 40mg",
+      "genericName": "Pantoprazole",
+      "description": "Proton pump inhibitor for acid reflux and stomach ulcers",
+      "imageUrl": "https://images.unsplash.com/photo-1550572017-edd951b55104?w=500",
+      "symptoms": ["acidity", "heartburn", "gastric"],
+      "requiresPrescription": false,
+      "stock": 140,
+      "reservedQuantity": 12,
+      "unitCostingPrice": 4.5,
+      "unitSellingPrice": 9.0,
+      "expiryDate": 1775689600000,
+      "conflicts": [],
+      "pharmacistId": "user_ph_5"
     }
   ],
   "reservations": [
@@ -95,15 +285,15 @@
     {
       "_id": "res_2",
       "customerId": "user_3",
-      "pharmacistId": "user_2",
+      "pharmacistId": "user_ph_2",
       "medsList": [
         {
-          "medicineId": "med_2",
+          "medicineId": "med_cp_2",
           "quantity": 1
         }
       ],
       "totalUnitsRequested": 1,
-      "totalCosting": 15.0,
+      "totalCosting": 18.0,
       "createdAt": 1704067200000,
       "pickupDate": 1704153600000,
       "prescriptionImageUrl": "https://example.com/prescription.jpg",
@@ -112,17 +302,18 @@
     {
       "_id": "res_3",
       "customerId": "user_4",
+      "pharmacistId": "user_ph_3",
       "medsList": [
         {
-          "medicineId": "med_3",
-          "quantity": 5
+          "medicineId": "med_mc_2",
+          "quantity": 3
         }
       ],
-      "totalUnitsRequested": 5,
-      "totalCosting": 32.5,
+      "totalUnitsRequested": 3,
+      "totalCosting": 12.0,
       "createdAt": 1704067200000,
       "pickupDate": 1704153600000,
-      "status": "cancelled"
+      "status": "approved"
     }
   ],
   "prescriptions": [
@@ -130,22 +321,15 @@
       "_id": "pres_1",
       "name": "Amoxicillin Prescription",
       "dateUploaded": 1704067200000,
-      "imageUrl": "https://example.com/prescription.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500",
       "userId": "user_3"
     },
     {
       "_id": "pres_2",
-      "name": "Eye Drops",
+      "name": "Eye Drops Script",
       "dateUploaded": 1704067200000,
-      "imageUrl": "https://example.com/eye_drops.jpg",
+      "imageUrl": "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=500",
       "userId": "user_3"
-    },
-    {
-      "_id": "pres_3",
-      "name": "Insulin Script",
-      "dateUploaded": 1704067200000,
-      "imageUrl": "https://example.com/insulin.jpg",
-      "userId": "user_4"
     }
   ],
   "favorites": [
@@ -156,13 +340,8 @@
     },
     {
       "_id": "fav_2",
-      "customerId": "user_4",
-      "pharmacistId": "user_2"
-    },
-    {
-      "_id": "fav_3",
       "customerId": "user_3",
-      "pharmacistId": "user_1"
+      "pharmacistId": "user_ph_2"
     }
   ],
   "complaintTickets": [
@@ -173,22 +352,6 @@
       "status": "open",
       "createdAt": 1704067200000,
       "updatedAt": 1704068200000
-    },
-    {
-      "_id": "ticket_2",
-      "creatorId": "user_2",
-      "title": "Missing weekly commission payout",
-      "status": "resolved",
-      "createdAt": 1704067200000,
-      "updatedAt": 1704153600000
-    },
-    {
-      "_id": "ticket_3",
-      "creatorId": "user_4",
-      "title": "Data deletion request (GDPR)",
-      "status": "open",
-      "createdAt": 1704067200000,
-      "updatedAt": 1704067200000
     }
   ],
   "complaintMessages": [
@@ -196,49 +359,7 @@
       "_id": "msg_1",
       "ticketId": "ticket_1",
       "senderId": "user_3",
-      "message": "Hello Admin, I visited the pharmacy managed by pharmacist@medivault.com today. They charged me $50 more than the app stated and refused to give me a refund. Please help.",
-      "timestamp": 1704067200000
-    },
-    {
-      "_id": "msg_2",
-      "ticketId": "ticket_1",
-      "senderId": "user_1",
-      "message": "We apologize for this experience. We are temporarily suspending their payout while we investigate this discrepancy. Can you provide the receipt?",
-      "timestamp": 1704067500000
-    },
-    {
-      "_id": "msg_3",
-      "ticketId": "ticket_1",
-      "senderId": "user_3",
-      "message": "Yes, I have attached it to my order profile. Thank you for acting quickly.",
-      "timestamp": 1704068200000
-    },
-    {
-      "_id": "msg_4",
-      "ticketId": "ticket_2",
-      "senderId": "user_2",
-      "message": "Hi, my dashboard says $450 was transferred to my bank on Monday, but it hasn't arrived yet. Is there an issue with the payment gateway?",
-      "timestamp": 1704067200000
-    },
-    {
-      "_id": "msg_5",
-      "ticketId": "ticket_2",
-      "senderId": "user_1",
-      "message": "It appears there was a bank holiday routing delay. It should reflect in your account by tomorrow morning.",
-      "timestamp": 1704067500000
-    },
-    {
-      "_id": "msg_6",
-      "ticketId": "ticket_2",
-      "senderId": "user_2",
-      "message": "Understood, it just came through. Thank you!",
-      "timestamp": 1704153600000
-    },
-    {
-      "_id": "msg_7",
-      "ticketId": "ticket_3",
-      "senderId": "user_4",
-      "message": "I would like to permanently delete my account and have all my medical data scrubbed from your servers in compliance with GDPR. How do I proceed?",
+      "message": "Hello Admin, I visited the pharmacy today. Please assist with my order.",
       "timestamp": 1704067200000
     }
   ],
@@ -247,24 +368,16 @@
       "_id": "notif_1",
       "senderId": "user_2",
       "receiverId": "user_3",
-      "message": "Your order is ready for pickup.",
+      "message": "Your order at HealthPlus Pharmacy is ready for pickup.",
       "isRead": false,
       "timestamp": 1704067200000
     },
     {
       "_id": "notif_2",
-      "senderId": "user_1",
-      "receiverId": "user_2",
-      "message": "Please review new policy.",
+      "senderId": "user_ph_2",
+      "receiverId": "user_3",
+      "message": "CarePoint Medical Store approved your reservation.",
       "isRead": true,
-      "timestamp": 1704067200000
-    },
-    {
-      "_id": "notif_3",
-      "senderId": "user_2",
-      "receiverId": "user_4",
-      "message": "Prescription rejected.",
-      "isRead": false,
       "timestamp": 1704067200000
     }
   ],
@@ -275,41 +388,13 @@
       "completedAt": 1704153600000,
       "itemsSnapshot": [
         {
-          "medicineId": "med_2",
+          "medicineId": "med_cp_2",
           "quantity": 1,
-          "unitCostingPriceAtSale": 8.0,
-          "unitSellingPriceAtSale": 15.0
+          "unitCostingPriceAtSale": 10.0,
+          "unitSellingPriceAtSale": 18.0
         }
       ],
-      "totalRevenue": 15.0
-    },
-    {
-      "_id": "trans_2",
-      "reservationId": "res_2",
-      "completedAt": 1704153600000,
-      "itemsSnapshot": [
-        {
-          "medicineId": "med_1",
-          "quantity": 3,
-          "unitCostingPriceAtSale": 2.5,
-          "unitSellingPriceAtSale": 5.0
-        }
-      ],
-      "totalRevenue": 15.0
-    },
-    {
-      "_id": "trans_3",
-      "reservationId": "res_2",
-      "completedAt": 1704153600000,
-      "itemsSnapshot": [
-        {
-          "medicineId": "med_3",
-          "quantity": 2,
-          "unitCostingPriceAtSale": 3.0,
-          "unitSellingPriceAtSale": 6.5
-        }
-      ],
-      "totalRevenue": 13.0
+      "totalRevenue": 18.0
     }
   ]
 }

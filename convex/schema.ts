@@ -12,6 +12,11 @@ export default defineSchema({
     imageUrl: v.optional(v.string()),
     isActive: v.boolean(),
     createdAt: v.optional(v.number()),
+    shopName: v.optional(v.string()),
+    shopAddress: v.optional(v.string()),
+    operatingHours: v.optional(v.string()),
+    description: v.optional(v.string()),
+    rating: v.optional(v.number()),
   })
     .index("by_email", ["email"])
     .index("by_role", ["role"]),
@@ -40,8 +45,10 @@ export default defineSchema({
     unitSellingPrice: v.number(),
     expiryDate: v.number(), // Unix timestamp (ms)
     conflicts: v.array(v.string()), // List of conflicting generic names
+    pharmacistId: v.optional(v.id("users")), // Unique store inventory binding
   })
-    .index("by_genericName", ["genericName"]),
+    .index("by_genericName", ["genericName"])
+    .index("by_pharmacist", ["pharmacistId"]),
 
   // 3. RESERVATION TABLE (Submitted orders awaiting pickup)
   reservations: defineTable({

@@ -21,16 +21,34 @@
   import { convex } from "$lib/convexClient";
   import { api } from "../../../../../convex/_generated/api";
 
+  let { data } = $props();
+
   // Reactive state — live from Convex
   let reservations = $state<any[]>([]);
-  let medicines = $state([...dummyData.medicines]);
+  let medicines = $state<any[]>([...dummyData.medicines]);
   let transactions = $state([...dummyData.transactionRecords]);
 
   onMount(() => {
-    const unsub = convex.onUpdate(api.reservations.listAllWithDetails, {}, (data) => {
-      reservations = data;
+    const unsubRes = convex.onUpdate(api.reservations.listAllWithDetails, {}, (resData) => {
+      if (resData) {
+        reservations = resData.filter(
+          (r) => !r.pharmacistId || r.pharmacistId === data?.user?._id
+        );
+      }
     });
-    return () => unsub();
+
+    const unsubMeds = convex.onUpdate(
+      api.medicines.listByPharmacist,
+      { pharmacistId: data?.user?._id as any },
+      (medData) => {
+        if (medData) medicines = medData;
+      }
+    );
+
+    return () => {
+      unsubRes();
+      unsubMeds();
+    };
   });
 
   // Derived metrics
@@ -89,7 +107,7 @@
         <Pill class="h-8 w-8 text-primary" /> Pharmacist Workspace
       </h1>
       <p class="text-xs text-muted-foreground mt-1">
-        Manage prescription verification, inventory stock levels, order delivery, and customer safety.
+        Welcome back, {data?.user?.name || 'Pharmacist'}! Manage prescription verification, inventory stock levels, order delivery, and customer safety.
       </p>
     </div>
     <div class="flex items-center gap-3">

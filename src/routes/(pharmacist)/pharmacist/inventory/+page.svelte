@@ -23,10 +23,27 @@
     Pill
   } from "lucide-svelte";
 
-  // Reactive State initialized from dummyData
-  let medicines = $state([...dummyData.medicines]);
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
+
+  let { data } = $props();
+
+  // Reactive State
+  let medicines = $state<any[]>([]);
   let searchQuery = $state("");
   let selectedFilter = $state("all");
+
+  onMount(() => {
+    const unsub = convex.onUpdate(
+      api.medicines.listByPharmacist,
+      { pharmacistId: data?.user?._id as any },
+      (liveMeds) => {
+        if (liveMeds) medicines = liveMeds;
+      }
+    );
+    return () => unsub();
+  });
 
   // Modal / Form state
   let isFormOpen = $state(false);
@@ -67,15 +84,16 @@
   );
 
   // Quick Stock Adjustment
-  function adjustStock(id: string, delta: number) {
-    medicines = medicines.map(m => {
-      if (m._id === id) {
-        const newStock = Math.max(0, m.stock + delta);
-        toast.success(`Updated ${m.name} stock to ${newStock} units`);
-        return { ...m, stock: newStock };
-      }
-      return m;
-    });
+  async function adjustStock(id: string, delta: number) {
+    try {
+      await convex.mutation(api.medicines.adjustStock, {
+        medicineId: id as any,
+        delta,
+      });
+      toast.success("Stock updated in database!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to adjust stock");
+    }
   }
 
   // Open Form for Adding New Medicine
@@ -111,7 +129,7 @@
   }
 
   // Save Medicine (Add or Edit)
-  function saveMedicine() {
+  async function saveMedicine() {
     if (!formName.trim() || !formGenericName.trim()) {
       toast.error("Medicine Name and Generic Name are required.");
       return;
@@ -121,44 +139,46 @@
     const conflictsArray = formConflicts.split(",").map(c => c.trim()).filter(Boolean);
     const expiryTimestamp = new Date(formExpiryDate).getTime();
 
-    if (editingMedicine) {
-      medicines = medicines.map(m => 
-        m._id === editingMedicine._id 
-          ? { 
-              ...m, 
-              name: formName, 
-              genericName: formGenericName, 
-              description: formDescription, 
-              symptoms: symptomsArray, 
-              stock: formStock, 
-              unitCostingPrice: formCostPrice, 
-              unitSellingPrice: formSellingPrice, 
-              requiresPrescription: formRequiresPrescription, 
-              conflicts: conflictsArray, 
-              expiryDate: expiryTimestamp 
-            } 
-          : m
-      );
-      toast.success(`${formName} updated successfully in inventory!`);
-    } else {
-      const newMed = {
-        _id: `med_${Date.now()}`,
-        name: formName,
-        genericName: formGenericName,
-        description: formDescription,
-        symptoms: symptomsArray,
-        requiresPrescription: formRequiresPrescription,
-        stock: formStock,
-        reservedQuantity: 0,
-        unitCostingPrice: formCostPrice,
-        unitSellingPrice: formSellingPrice,
-        expiryDate: expiryTimestamp,
-        conflicts: conflictsArray
-      };
-      medicines = [newMed, ...medicines];
-      toast.success(`${formName} added to inventory!`);
+    try {
+      if (editingMedicine) {
+        await convex.mutation(api.medicines.updateMedicine, {
+          medicineId: editingMedicine._id as any,
+          name: formName,
+          genericName: formGenericName,
+          description: formDescription,
+          symptoms: symptomsArray,
+          stock: formStock,
+          unitCostingPrice: formCostPrice,
+          unitSellingPrice: formSellingPrice,
+          requiresPrescription: formRequiresPrescription,
+          conflicts: conflictsArray,
+          expiryDate: expiryTimestamp,
+        });
+        toast.success(`${formName} updated successfully in database!`);
+      } else {
+        if (!data?.user?._id) {
+          toast.error("You must be logged in as a pharmacist to add medicines.");
+          return;
+        }
+        await convex.mutation(api.medicines.createMedicine, {
+          pharmacistId: data.user._id as any,
+          name: formName,
+          genericName: formGenericName,
+          description: formDescription,
+          symptoms: symptomsArray,
+          requiresPrescription: formRequiresPrescription,
+          stock: formStock,
+          unitCostingPrice: formCostPrice,
+          unitSellingPrice: formSellingPrice,
+          expiryDate: expiryTimestamp,
+          conflicts: conflictsArray,
+        });
+        toast.success(`${formName} added to database inventory!`);
+      }
+      isFormOpen = false;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to save medicine");
     }
-    isFormOpen = false;
   }
 
   // Delete Medicine Confirmation
@@ -167,12 +187,18 @@
     isDeleteOpen = true;
   }
 
-  function confirmDelete() {
+  async function confirmDelete() {
     if (medicineToDelete) {
-      medicines = medicines.filter(m => m._id !== medicineToDelete._id);
-      toast.success(`${medicineToDelete.name} has been removed from inventory.`);
-      isDeleteOpen = false;
-      medicineToDelete = null;
+      try {
+        await convex.mutation(api.medicines.deleteMedicine, {
+          medicineId: medicineToDelete._id as any,
+        });
+        toast.success(`${medicineToDelete.name} has been removed from database.`);
+        isDeleteOpen = false;
+        medicineToDelete = null;
+      } catch (err: any) {
+        toast.error(err.message || "Failed to delete medicine");
+      }
     }
   }
 

@@ -1,4 +1,5 @@
 import { json } from "@sveltejs/kit";
+import { env } from "$env/dynamic/private";
 import type { RequestHandler } from "./$types";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -41,8 +42,8 @@ export const POST: RequestHandler = async ({ request }) => {
       return json({ error: "Message is required" }, { status: 400 });
     }
 
-    const apiKey = (process.env.OPENROUTER_API_KEY || "").trim();
-    const model = (process.env.OPENROUTER_MODEL || DEFAULT_MODEL).trim();
+    const apiKey = (env.OPENROUTER_API_KEY || (globalThis as any).process?.env?.OPENROUTER_API_KEY || "").trim();
+    const model = (env.OPENROUTER_MODEL || (globalThis as any).process?.env?.OPENROUTER_MODEL || DEFAULT_MODEL).trim();
 
     // Retrieve up to last 3 turn pairs (6 messages max: 3 user + 3 assistant)
     const recentHistory: ChatTurn[] = (history || [])

@@ -6,7 +6,6 @@
   import EmptyState from "$lib/components/shared/EmptyState.svelte";
   import { Input } from "$lib/components/ui/input";
   import { Button } from "$lib/components/ui/button";
-  import { Badge } from "$lib/components/ui/badge";
   import { cart } from "$lib/stores/cartStore.svelte";
   import {
     Search,
@@ -17,159 +16,71 @@
     Pill,
     Shield,
   } from "lucide-svelte";
-
-  const pharmacyList = [
-    {
-      id: "ph-1",
-      name: "HealthPlus Pharmacy",
-      address: "42 Mirpur Road, Dhaka 1205",
-      phone: "+880 1712-345678",
-      description:
-        "Your trusted neighborhood pharmacy with 24/7 service, competitive prices, and a wide range of prescription and OTC medicines.",
-      licenseNumber: "DGDA-2024-0042",
-    },
-    {
-      id: "ph-2",
-      name: "CarePoint Medical Store",
-      address: "15 Gulshan Avenue, Dhaka 1212",
-      phone: "+880 1898-765432",
-      description:
-        "Premium pharmacy specializing in imported medicines and healthcare products.",
-      licenseNumber: "DGDA-2024-0043",
-    },
-    {
-      id: "ph-3",
-      name: "MediCare Pharmacy",
-      address: "7 Dhanmondi R/A, Dhaka 1209",
-      phone: "+880 1555-112233",
-      description:
-        "Family-owned pharmacy serving the community for over 20 years.",
-      licenseNumber: "DGDA-2024-0044",
-    },
-    {
-      id: "ph-4",
-      name: "Green Cross Dispensary",
-      address: "89 Banani Model Town, Dhaka 1213",
-      phone: "+880 1678-998877",
-      description:
-        "Modern dispensary with digital prescription management and home delivery.",
-      licenseNumber: "DGDA-2024-0045",
-    },
-    {
-      id: "ph-5",
-      name: "University Health Center",
-      address: "BUET Campus, Polashi, Dhaka 1000",
-      phone: "+880 1911-445566",
-      description:
-        "Campus health center providing affordable medicines for students and staff.",
-      licenseNumber: "DGDA-2024-0046",
-    },
-    {
-      id: "ph-6",
-      name: "Lazz Pharma",
-      address: "156 Motijheel C/A, Dhaka 1000",
-      phone: "+880 1811-223344",
-      description:
-        "One of the largest pharmacy chains in Bangladesh with extensive stock.",
-      licenseNumber: "DGDA-2024-0047",
-    },
-  ];
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../convex/_generated/api";
 
   const pharmacyId = $derived(page.params.pharmacyID ?? "");
 
-  const pharmacy = $derived(
-    pharmacyList.find((p) => p.id === pharmacyId) ?? {
+  let dbPharmacies = $state<any[]>([]);
+  let dbMedicines = $state<any[]>([]);
+
+  onMount(() => {
+    const unsubP = convex.onUpdate(api.users.listPharmacies, {}, (data) => {
+      if (data) dbPharmacies = data;
+    });
+
+    const unsubM = convex.onUpdate(
+      api.medicines.listByPharmacist,
+      { pharmacistId: pharmacyId as any },
+      (medData) => {
+        if (medData) dbMedicines = medData;
+      }
+    );
+
+    return () => {
+      unsubP();
+      unsubM();
+    };
+  });
+
+  const pharmacyObj = $derived(() => {
+    const found = dbPharmacies.find((p) => p._id === pharmacyId);
+    if (found) {
+      return {
+        id: found._id,
+        name: found.name,
+        address: found.address,
+        phone: found.phone,
+        description: found.description,
+        licenseNumber: "DGDA-2024-" + found._id.slice(-4),
+      };
+    }
+    return {
       id: pharmacyId,
-      name: "HealthPlus Pharmacy",
-      address: "42 Mirpur Road, Dhaka 1205",
-      phone: "+880 1712-345678",
-      description: "Your trusted neighborhood pharmacy.",
-      licenseNumber: "DGDA-2024-0042",
-    },
-  );
+      name: "Pharmacy Store",
+      address: "Dhaka, Bangladesh",
+      phone: "+880 1700-000000",
+      description: "Licensed medical dispensary.",
+      licenseNumber: "DGDA-2024-0001",
+    };
+  });
 
   // Search & filter state
   let searchQuery = $state("");
   let activeFilter = $state("all");
 
-  // Mock medicines data
-  const medicines = [
-    {
-      medicineId: "med-1",
-      name: "Paracetamol 500mg",
-      genericName: "Acetaminophen",
-      unitPrice: 2.5,
-      stock: 150,
-      requiresPrescription: false,
-      symptoms: ["Headache", "Fever", "Body pain"],
-    },
-    {
-      medicineId: "med-2",
-      name: "Amoxicillin 250mg",
-      genericName: "Amoxicillin Trihydrate",
-      unitPrice: 8.0,
-      stock: 80,
-      requiresPrescription: true,
-      symptoms: ["Bacterial infection", "Sinusitis", "UTI"],
-    },
-    {
-      medicineId: "med-3",
-      name: "Cetirizine 10mg",
-      genericName: "Cetirizine Hydrochloride",
-      unitPrice: 5.0,
-      stock: 200,
-      requiresPrescription: false,
-      symptoms: ["Allergies", "Runny nose", "Hay fever", "Itching"],
-    },
-    {
-      medicineId: "med-4",
-      name: "Omeprazole 20mg",
-      genericName: "Omeprazole",
-      unitPrice: 6.5,
-      stock: 120,
-      requiresPrescription: false,
-      symptoms: ["Acid reflux", "Heartburn", "GERD"],
-    },
-    {
-      medicineId: "med-5",
-      name: "Metformin 500mg",
-      genericName: "Metformin Hydrochloride",
-      unitPrice: 4.0,
-      stock: 0,
-      requiresPrescription: true,
-      symptoms: ["Type 2 Diabetes"],
-    },
-    {
-      medicineId: "med-6",
-      name: "Ciprofloxacin 500mg",
-      genericName: "Ciprofloxacin Hydrochloride",
-      unitPrice: 12.0,
-      stock: 45,
-      requiresPrescription: true,
-      symptoms: ["Bacterial infection", "UTI", "Respiratory infection"],
-    },
-    {
-      medicineId: "med-7",
-      name: "Losartan 50mg",
-      genericName: "Losartan Potassium",
-      unitPrice: 7.0,
-      stock: 90,
-      requiresPrescription: true,
-      symptoms: ["Hypertension", "High blood pressure"],
-    },
-    {
-      medicineId: "med-8",
-      name: "Ibuprofen 400mg",
-      genericName: "Ibuprofen",
-      unitPrice: 3.0,
-      stock: 300,
-      requiresPrescription: false,
-      symptoms: ["Pain", "Inflammation", "Fever", "Headache"],
-    },
-  ];
-
   const filteredMedicines = $derived(() => {
-    let results = [...medicines];
+    let results = dbMedicines.map((m) => ({
+      medicineId: m._id,
+      name: m.name,
+      genericName: m.genericName,
+      unitPrice: m.unitSellingPrice,
+      stock: m.stock,
+      requiresPrescription: m.requiresPrescription,
+      symptoms: m.symptoms || [],
+      imageUrl: m.imageUrl,
+    }));
 
     // Search filter
     if (searchQuery.trim()) {
@@ -178,7 +89,7 @@
         (m) =>
           m.name.toLowerCase().includes(q) ||
           m.genericName.toLowerCase().includes(q) ||
-          m.symptoms.some((s) => s.toLowerCase().includes(q)),
+          m.symptoms.some((s: string) => s.toLowerCase().includes(q))
       );
     }
 
@@ -203,10 +114,10 @@
 
   // Cart summary for this pharmacy
   const cartItemsHere = $derived(
-    cart.pharmacyId === pharmacyId ? cart.itemCount : 0,
+    cart.pharmacyId === pharmacyId ? cart.itemCount : 0
   );
   const cartTotalHere = $derived(
-    cart.pharmacyId === pharmacyId ? cart.subtotal : 0,
+    cart.pharmacyId === pharmacyId ? cart.subtotal : 0
   );
 
   // Pharmacy gradient
@@ -215,7 +126,7 @@
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    const opacity = 0.8 + Math.abs(hash % 20) / 100;
+    const opacity = 0.8 + (Math.abs(hash % 20) / 100);
     return `linear-gradient(135deg, hsl(var(--primary) / ${opacity.toFixed(2)}), hsl(var(--accent) / 0.95))`;
   }
 
@@ -236,12 +147,12 @@
   <div class="rounded-xl border overflow-hidden bg-card shadow-sm">
     <div
       class="h-36 sm:h-44 flex items-center justify-center relative"
-      style:background={getGradient(pharmacy.name)}
+      style:background={getGradient(pharmacyObj().name)}
     >
       <span
         class="text-primary-foreground font-black text-6xl drop-shadow-md select-none"
       >
-        {getInitials(pharmacy.name)}
+        {getInitials(pharmacyObj().name)}
       </span>
     </div>
 
@@ -251,32 +162,32 @@
       >
         <div>
           <h1 class="text-2xl font-bold text-foreground mb-1">
-            {pharmacy.name}
+            {pharmacyObj().name}
           </h1>
           <p
             class="text-sm text-muted-foreground mb-4 max-w-xl leading-relaxed"
           >
-            {pharmacy.description}
+            {pharmacyObj().description}
           </p>
           <div class="flex flex-wrap gap-x-6 gap-y-2">
             <span
               class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
             >
               <MapPin class="h-3.5 w-3.5 text-primary shrink-0" />
-              {pharmacy.address}
+              {pharmacyObj().address}
             </span>
             <span
               class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
             >
               <Phone class="h-3.5 w-3.5 text-primary shrink-0" />
-              {pharmacy.phone}
+              {pharmacyObj().phone}
             </span>
-            {#if pharmacy.licenseNumber}
+            {#if pharmacyObj().licenseNumber}
               <span
                 class="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
               >
                 <Shield class="h-3.5 w-3.5 text-primary shrink-0" />
-                {pharmacy.licenseNumber}
+                {pharmacyObj().licenseNumber}
               </span>
             {/if}
           </div>
@@ -347,8 +258,9 @@
           stock={med.stock}
           requiresPrescription={med.requiresPrescription}
           symptoms={med.symptoms}
+          imageUrl={med.imageUrl}
           {pharmacyId}
-          pharmacyName={pharmacy?.name ?? "Pharmacy"}
+          pharmacyName={pharmacyObj().name}
           detailHref="/pharmacy/{pharmacyId}/{med.medicineId}"
         />
       {/each}

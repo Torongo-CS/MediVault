@@ -71,6 +71,7 @@ export const create = mutation({
   args: {
     customerId: v.optional(v.id("users")),
     customerEmail: v.optional(v.string()),
+    pharmacistId: v.optional(v.id("users")),
     medsList: v.array(
       v.object({
         medicineId: v.string(),
@@ -86,6 +87,7 @@ export const create = mutation({
     let totalUnitsRequested = 0;
     let totalCosting = 0;
     let requiresPrescription = false;
+    let inferredPharmacistId: Id<"users"> | undefined = args.pharmacistId;
 
     // Validate medicines, stock, and calculate total pricing
     for (const item of args.medsList) {
@@ -99,6 +101,10 @@ export const create = mutation({
       if (med) {
         if (med.requiresPrescription) {
           requiresPrescription = true;
+        }
+
+        if (!inferredPharmacistId && med.pharmacistId) {
+          inferredPharmacistId = med.pharmacistId;
         }
 
         const availableStock = med.stock - med.reservedQuantity;
@@ -118,13 +124,14 @@ export const create = mutation({
 
     if (requiresPrescription && !args.prescriptionImageUrl) {
       throw new Error(
-        "One or more medicines in your order require a valid prescription. Please upload your prescription before submitting."
+        "One or more medicines in your order require a valid prescription. Please upload or attach your prescription before submitting."
       );
     }
 
     const defaultPickup = Date.now() + 24 * 60 * 60 * 1000;
     const reservationId = await ctx.db.insert("reservations", {
       customerId: validCustomerId,
+      pharmacistId: inferredPharmacistId,
       medsList: args.medsList,
       totalUnitsRequested,
       totalCosting,
@@ -349,6 +356,8 @@ export const listAllWithDetails = query({
           if (ph) pharmacistName = ph.name || ph.email;
         }
 
+        const allConflicts = medsList.flatMap((m) => m.conflicts || []);
+
         return {
           ...res,
           customerEmail,
@@ -356,6 +365,7 @@ export const listAllWithDetails = query({
           medsList,
           pharmacistName,
           hasRxRequired: medsList.some((m) => m.requiresPrescription),
+          allConflicts,
         };
       })
     );

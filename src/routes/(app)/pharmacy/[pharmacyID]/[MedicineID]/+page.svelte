@@ -19,28 +19,73 @@
     Tag,
     Upload,
   } from "lucide-svelte";
+  import { onMount } from "svelte";
+  import { convex } from "$lib/convexClient";
+  import { api } from "../../../../../../convex/_generated/api";
 
   const pharmacyId = $derived(page.params.pharmacyID ?? "");
   const medicineId = $derived(page.params.MedicineID ?? "");
 
-  // Mock data — will be replaced with Convex query
-  const pharmacy = $derived({ id: pharmacyId, name: "HealthPlus Pharmacy" });
+  let dbPharmacies = $state<any[]>([]);
+  let dbMedicine = $state<any | null>(null);
 
-  const medicine = $derived({
-    medicineId,
-    name: "Paracetamol 500mg",
-    genericName: "Acetaminophen",
-    description:
-      "Paracetamol is a common painkiller used to treat aches and pain. It can also be used to reduce a high temperature. It's available combined with other painkillers and anti-sickness medicines. It's also an ingredient in a wide range of cold and flu remedies.",
-    unitPrice: 2.5,
-    stock: 150,
-    requiresPrescription: false,
-    symptoms: ["Headache", "Fever", "Body pain", "Toothache", "Cold"],
-    mfgDate: Date.now() - 180 * 24 * 60 * 60 * 1000,
-    expiryDate: Date.now() + 540 * 24 * 60 * 60 * 1000,
+  onMount(() => {
+    const unsubP = convex.onUpdate(api.users.listPharmacies, {}, (data) => {
+      if (data) dbPharmacies = data;
+    });
+
+    const unsubM = convex.onUpdate(
+      api.medicines.getById,
+      { medicineId: medicineId as any },
+      (medData) => {
+        if (medData) dbMedicine = medData;
+      }
+    );
+
+    return () => {
+      unsubP();
+      unsubM();
+    };
   });
 
-  const inStock = $derived(medicine.stock > 0);
+  const pharmacyObj = $derived(() => {
+    const found = dbPharmacies.find((p) => p._id === pharmacyId);
+    return {
+      id: pharmacyId,
+      name: found ? found.name : "Pharmacy Store",
+    };
+  });
+
+  const medicineObj = $derived(() => {
+    if (dbMedicine) {
+      return {
+        medicineId: dbMedicine._id,
+        name: dbMedicine.name,
+        genericName: dbMedicine.genericName,
+        description: dbMedicine.description || "No detailed description available.",
+        unitPrice: dbMedicine.unitSellingPrice ?? 0,
+        stock: dbMedicine.stock ?? 0,
+        requiresPrescription: !!dbMedicine.requiresPrescription,
+        symptoms: dbMedicine.symptoms || [],
+        mfgDate: Date.now() - 180 * 24 * 60 * 60 * 1000,
+        expiryDate: dbMedicine.expiryDate || Date.now() + 540 * 24 * 60 * 60 * 1000,
+      };
+    }
+    return {
+      medicineId,
+      name: "Loading Medicine...",
+      genericName: "",
+      description: "Fetching medicine details from database...",
+      unitPrice: 0,
+      stock: 0,
+      requiresPrescription: false,
+      symptoms: [],
+      mfgDate: Date.now(),
+      expiryDate: Date.now(),
+    };
+  });
+
+  const inStock = $derived(medicineObj().stock > 0);
   const cartQty = $derived(cart.getItemQuantity(medicineId));
   const isInCart = $derived(cartQty > 0);
 
@@ -58,27 +103,29 @@
   }
 
   function handleAddToCart() {
-    const result = cart.addItem(pharmacyId, pharmacy.name, {
-      medicineId: medicine.medicineId,
-      medicineName: medicine.name,
-      genericName: medicine.genericName,
-      unitPrice: medicine.unitPrice,
-      requiresPrescription: medicine.requiresPrescription,
-      stock: medicine.stock,
+    const med = medicineObj();
+    const pharm = pharmacyObj();
+    const result = cart.addItem(pharmacyId, pharm.name, {
+      medicineId: med.medicineId,
+      medicineName: med.name,
+      genericName: med.genericName,
+      unitPrice: med.unitPrice,
+      requiresPrescription: med.requiresPrescription,
+      stock: med.stock,
     }, selectedQty);
 
     if (result === "pharmacy_conflict") {
       const confirmed = confirm(
-        `Your cart has items from "${cart.pharmacyName}". Switch to "${pharmacy.name}" and clear the current cart?`
+        `Your cart has items from "${cart.pharmacyName}". Switch to "${pharm.name}" and clear the current cart?`
       );
       if (confirmed) {
-        cart.switchPharmacyAndAdd(pharmacyId, pharmacy.name, {
-          medicineId: medicine.medicineId,
-          medicineName: medicine.name,
-          genericName: medicine.genericName,
-          unitPrice: medicine.unitPrice,
-          requiresPrescription: medicine.requiresPrescription,
-          stock: medicine.stock,
+        cart.switchPharmacyAndAdd(pharmacyId, pharm.name, {
+          medicineId: med.medicineId,
+          medicineName: med.name,
+          genericName: med.genericName,
+          unitPrice: med.unitPrice,
+          requiresPrescription: med.requiresPrescription,
+          stock: med.stock,
         }, selectedQty);
       }
     }
@@ -87,12 +134,14 @@
   function handleExplain() {
     isExplaining = true;
     aiExplanation = "";
-    // Simulated AI response
     setTimeout(() => {
+      const med = medicineObj();
       aiExplanation =
-        "Paracetamol is a very common medicine that helps with two main things: reducing pain and lowering fever. Think of it as your go-to for headaches, toothaches, or when you're feeling feverish from a cold. It works by blocking certain chemicals in your brain that cause pain signals. It's generally very safe when taken as directed — usually 1-2 tablets every 4-6 hours, but never more than 8 tablets in 24 hours. Unlike ibuprofen, it's gentle on your stomach.";
+        `${med.name} (${med.genericName}) is prescribed or used for ${med.symptoms.join(", ") || "general symptoms"}. ` +
+        `It is available from ${pharmacyObj().name} for ৳${med.unitPrice.toFixed(2)} per unit. ` +
+        (med.requiresPrescription ? "Note: A valid doctor prescription is required to fulfill this medicine." : "This is an OTC medicine and does not require a prescription.");
       isExplaining = false;
-    }, 1500);
+    }, 1200);
   }
 
   // Gradient for medicine placeholder
@@ -109,8 +158,8 @@
 
 <div class="space-y-6 max-w-5xl">
   <PageHeader
-    title={medicine.name}
-    subtitle={medicine.genericName}
+    title={medicineObj().name}
+    subtitle={medicineObj().genericName}
     showBack={true}
     backHref="/pharmacy/{pharmacyId}"
   />
@@ -121,7 +170,7 @@
     <div class="lg:col-span-2">
       <div
         class="rounded-xl overflow-hidden aspect-square flex items-center justify-center"
-        style:background={getGradient(medicine.name)}
+        style:background={getGradient(medicineObj().name)}
       >
         <Pill class="h-20 w-20 text-white/70 drop-shadow-lg" />
       </div>
@@ -131,14 +180,14 @@
     <div class="lg:col-span-3 space-y-5">
       <!-- Name & Generic -->
       <div>
-        <h1 class="text-2xl font-bold text-foreground mb-1">{medicine.name}</h1>
-        <p class="text-sm text-muted-foreground">{medicine.genericName}</p>
+        <h1 class="text-2xl font-bold text-foreground mb-1">{medicineObj().name}</h1>
+        <p class="text-sm text-muted-foreground">{medicineObj().genericName}</p>
       </div>
 
       <!-- Price & Stock -->
       <div class="flex items-center gap-4">
         <span class="text-3xl font-bold text-primary">
-          ৳{medicine.unitPrice.toFixed(2)}
+          ৳{medicineObj().unitPrice.toFixed(2)}
         </span>
         <span class="text-xs text-muted-foreground">/unit</span>
         <div class="ml-auto">
@@ -148,7 +197,7 @@
               class="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-semibold"
             >
               <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-              {medicine.stock} in stock
+              {medicineObj().stock} in stock
             </Badge>
           {:else}
             <Badge variant="destructive" class="font-semibold">Out of Stock</Badge>
@@ -157,7 +206,7 @@
       </div>
 
       <!-- Rx Warning -->
-      {#if medicine.requiresPrescription}
+      {#if medicineObj().requiresPrescription}
         <div
           class="flex items-start gap-2.5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"
         >
@@ -188,9 +237,9 @@
           Description
         </h3>
         <p class="text-sm text-muted-foreground leading-relaxed {showFullDescription ? '' : 'line-clamp-3'}">
-          {medicine.description}
+          {medicineObj().description}
         </p>
-        {#if medicine.description && medicine.description.length > 150}
+        {#if medicineObj().description && medicineObj().description.length > 150}
           <button
             class="text-xs text-primary font-semibold mt-1 hover:underline"
             onclick={() => (showFullDescription = !showFullDescription)}
@@ -201,27 +250,29 @@
       </div>
 
       <!-- Symptoms Tags -->
-      <div>
-        <h3 class="text-xs font-bold text-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          <Tag class="h-3.5 w-3.5" />
-          Used for
-        </h3>
-        <div class="flex flex-wrap gap-1.5">
-          {#each medicine.symptoms as symptom}
-            <Badge variant="secondary" class="text-xs px-2 py-0.5 font-medium">{symptom}</Badge>
-          {/each}
+      {#if medicineObj().symptoms.length > 0}
+        <div>
+          <h3 class="text-xs font-bold text-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <Tag class="h-3.5 w-3.5" />
+            Used for
+          </h3>
+          <div class="flex flex-wrap gap-1.5">
+            {#each medicineObj().symptoms as symptom}
+              <Badge variant="secondary" class="text-xs px-2 py-0.5 font-medium">{symptom}</Badge>
+            {/each}
+          </div>
         </div>
-      </div>
+      {/if}
 
       <!-- Expiry -->
       <div class="flex gap-6 text-xs text-muted-foreground">
         <span class="flex items-center gap-1.5">
           <Calendar class="h-3.5 w-3.5" />
-          Mfg: {formatDate(medicine.mfgDate)}
+          Mfg: {formatDate(medicineObj().mfgDate)}
         </span>
         <span class="flex items-center gap-1.5">
           <Calendar class="h-3.5 w-3.5" />
-          Exp: {formatDate(medicine.expiryDate)}
+          Exp: {formatDate(medicineObj().expiryDate)}
         </span>
       </div>
 
@@ -234,13 +285,13 @@
               {#if isInCart}
                 <QuantitySelector
                   value={cartQty}
-                  max={medicine.stock}
+                  max={medicineObj().stock}
                   onchange={(qty) => cart.updateQuantity(medicineId, qty)}
                 />
               {:else}
                 <QuantitySelector
                   value={selectedQty}
-                  max={medicine.stock}
+                  max={medicineObj().stock}
                   onchange={(qty) => (selectedQty = qty)}
                 />
               {/if}
@@ -248,10 +299,10 @@
 
             <div class="text-right">
               <p class="text-lg font-bold text-foreground">
-                ৳{(medicine.unitPrice * (isInCart ? cartQty : selectedQty)).toFixed(2)}
+                ৳{(medicineObj().unitPrice * (isInCart ? cartQty : selectedQty)).toFixed(2)}
               </p>
               <p class="text-[10px] text-muted-foreground">
-                ৳{medicine.unitPrice.toFixed(2)} × {isInCart ? cartQty : selectedQty}
+                ৳{medicineObj().unitPrice.toFixed(2)} × {isInCart ? cartQty : selectedQty}
               </p>
             </div>
           </div>

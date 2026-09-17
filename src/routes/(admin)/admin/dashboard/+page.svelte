@@ -9,6 +9,8 @@
   import { convex } from "$lib/convexClient";
   import { api } from "../../../../../convex/_generated/api";
 
+  let { data } = $props();
+
   let metrics = $state<any>(null);
   let isLoading = $state(true);
 
@@ -99,7 +101,10 @@
 
 <div class="dashboard-container">
   <div class="dashboard-header">
-    <h1 class="dashboard-title">Admin Reports & Analytics</h1>
+    <div>
+      <h1 class="dashboard-title">Welcome back, {data?.user?.name || "Admin"}! 👋</h1>
+      <p class="text-xs text-muted-foreground mt-1">MediVault Admin Reports & Analytics</p>
+    </div>
     <Button variant="default">Download Report</Button>
   </div>
 

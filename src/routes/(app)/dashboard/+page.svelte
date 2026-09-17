@@ -8,8 +8,9 @@
     CalendarCheck, Clock, Bell, Pill, Brain, FileText, History,
     Heart, ArrowRight, ChevronRight, Sparkles,
   } from "lucide-svelte";
+  let { data } = $props();
 
-  const userName = "Rafiq";
+  const userName = $derived(data?.user?.name || "User");
 
   function getGreeting(): string {
     const hour = new Date().getHours();

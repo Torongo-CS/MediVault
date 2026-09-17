@@ -22,18 +22,28 @@
     MessageSquare,
     ShieldAlert,
     Pill,
+    Download,
+    ExternalLink,
+    Maximize2,
+    Sparkles,
+    Brain,
+    RefreshCw,
   } from "lucide-svelte";
 
   import { convex } from "$lib/convexClient";
   import { api } from "../../../../../convex/_generated/api";
   import { onMount } from "svelte";
 
+  let { data } = $props();
+
   // Reactive State — live from Convex
   let reservations = $state<any[]>([]);
 
   onMount(() => {
-    const unsub = convex.onUpdate(api.reservations.listAllWithDetails, {}, (data) => {
-      reservations = data;
+    const unsub = convex.onUpdate(api.reservations.listAllWithDetails, {}, (dataRes) => {
+      if (dataRes) {
+        reservations = dataRes;
+      }
     });
     return () => unsub();
   });
@@ -44,12 +54,21 @@
   // Dialog & Detail states
   let isDetailOpen = $state(false);
   let isRejectOpen = $state(false);
+  let viewDocUrl = $state<string | null>(null);
   let selectedReservation = $state<any>(null);
   let rejectionReason = $state("");
   let pharmacistNote = $state("");
 
-  // No longer need to manually enrich — data comes pre-enriched from listAllWithDetails
-  let enrichedReservations = $derived(reservations);
+  // AI OCR Scanning State
+  let isOcrScanning = $state(false);
+  let ocrVerdict = $state<any | null>(null);
+
+  // Filter reservations relevant for this pharmacist (or all if unbounded)
+  let enrichedReservations = $derived(
+    reservations.filter(
+      (r) => !r.pharmacistId || !data?.user?._id || r.pharmacistId === data?.user?._id
+    )
+  );
 
   // Filtered reservations based on tab & search query
   let filteredReservations = $derived(
@@ -58,7 +77,7 @@
         r._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (r.customerEmail || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         r.medsList.some((m: any) =>
-          (m.medicineName || "").toLowerCase().includes(searchQuery.toLowerCase()),
+          (m.medicineName || "").toLowerCase().includes(searchQuery.toLowerCase())
         );
 
       if (!matchesSearch) return false;
@@ -71,7 +90,7 @@
       if (selectedTab === "rejected")
         return r.status === "rejected" || r.status === "cancelled";
       return true;
-    }),
+    })
   );
 
   // Actions
@@ -79,6 +98,47 @@
     selectedReservation = res;
     pharmacistNote = res.pharmacistNote || "";
     isDetailOpen = true;
+    if (res.prescriptionImageUrl || res.prescription) {
+      runOcrScan(res);
+    } else {
+      ocrVerdict = null;
+    }
+  }
+
+  async function runOcrScan(resObj: any) {
+    const docUrl = resObj?.prescriptionImageUrl || resObj?.prescription;
+    if (!docUrl) return;
+
+    isOcrScanning = true;
+    ocrVerdict = null;
+
+    try {
+      const resp = await fetch("/api/ai/ocr-scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prescriptionImageUrl: docUrl,
+          medsList: (resObj.medsList || []).map((m: any) => ({
+            medicineName: m.medicineName || m.name || "Medicine",
+            genericName: m.genericName || m.generic || "",
+            requiresPrescription: m.requiresPrescription ?? m.rx ?? true,
+          })),
+        }),
+      });
+
+      const dataRes = await resp.json();
+      if (resp.ok) {
+        ocrVerdict = dataRes;
+        toast.success("AI OCR Prescription Analysis Complete!");
+      } else {
+        toast.error(dataRes.error || "Failed to scan prescription document.");
+      }
+    } catch (err: any) {
+      console.error("OCR Scan Error:", err);
+      toast.error("Error connecting to AI OCR Scanner endpoint.");
+    } finally {
+      isOcrScanning = false;
+    }
   }
 
   async function approveReservation(id: string) {
@@ -88,7 +148,7 @@
         pharmacistNote: pharmacistNote || "Approved by Pharmacist",
       });
       toast.success(
-        `Reservation #${id.slice(-6)} approved! Customer notified.`,
+        `Reservation #${id.slice(-6)} approved! Customer notified.`
       );
     } catch (err: any) {
       toast.error(err.message || "Failed to approve reservation.");
@@ -114,7 +174,7 @@
         reservationId: id as any,
       });
       toast.success(
-        `Reservation #${id.slice(-6)} marked as Completed & Delivered.`,
+        `Reservation #${id.slice(-6)} marked as Completed & Delivered.`
       );
     } catch (err: any) {
       toast.error(err.message || "Failed to complete order.");
@@ -140,7 +200,7 @@
         reason: rejectionReason,
       });
       toast.error(
-        `Reservation #${selectedReservation._id.slice(-6)} rejected and customer notified.`,
+        `Reservation #${selectedReservation._id.slice(-6)} rejected and customer notified.`
       );
     } catch (err: any) {
       toast.error(err.message || "Failed to reject reservation.");
@@ -167,6 +227,49 @@
         return "bg-slate-100 text-slate-800 border-slate-300";
     }
   }
+
+  function isPdf(url?: string): boolean {
+    if (!url) return false;
+    return (
+      url.startsWith("data:application/pdf") ||
+      url.toLowerCase().endsWith(".pdf") ||
+      url.toLowerCase().includes("application/pdf")
+    );
+  }
+
+  function openDocument(url?: string) {
+    if (!url) return;
+    if (url.startsWith("data:application/pdf")) {
+      try {
+        const arr = url.split(",");
+        const mime = arr[0].match(/:(.*?);/)?.[1] || "application/pdf";
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        const blob = new Blob([u8arr], { type: mime });
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, "_blank");
+        return;
+      } catch (err) {
+        console.error("PDF Blob conversion error", err);
+      }
+    }
+
+    if (url.startsWith("data:")) {
+      const w = window.open("");
+      if (w) {
+        w.document.write(
+          `<title>Prescription Document</title><style>body{margin:0;background:#111;display:flex;justify-content:center;align-items:center;height:100vh;}</style><iframe src="${url}" style="width:100%;height:100vh;border:none;"></iframe>`
+        );
+        return;
+      }
+    }
+
+    window.open(url, "_blank");
+  }
 </script>
 
 <div class="dashboard-container max-w-7xl mx-auto p-4 md:p-8 space-y-8">
@@ -181,7 +284,7 @@
         <CheckCircle2 class="w-8 h-8 text-primary" /> Pending Approvals & Reservations
       </h1>
       <p class="text-muted-foreground mt-1 text-sm md:text-base">
-        Review customer order requests, inspect uploaded prescriptions, verify
+        Review customer order requests, inspect uploaded doctor prescriptions & PDFs with AI OCR, verify
         drug interactions, and grant approvals.
       </p>
     </div>
@@ -197,7 +300,7 @@
         onclick={() => (selectedTab = "all")}
         class="text-xs rounded-full"
       >
-        All ({reservations.length})
+        All ({enrichedReservations.length})
       </Button>
       <Button
         variant={selectedTab === "pending" ? "default" : "outline"}
@@ -205,7 +308,7 @@
         onclick={() => (selectedTab = "pending")}
         class="text-xs rounded-full"
       >
-        Pending ({reservations.filter((r) => r.status === "pending").length})
+        Pending ({enrichedReservations.filter((r) => r.status === "pending").length})
       </Button>
       <Button
         variant={selectedTab === "approved" ? "default" : "outline"}
@@ -213,7 +316,7 @@
         onclick={() => (selectedTab = "approved")}
         class="text-xs rounded-full"
       >
-        Approved ({reservations.filter((r) => r.status === "approved").length})
+        Approved ({enrichedReservations.filter((r) => r.status === "approved").length})
       </Button>
       <Button
         variant={selectedTab === "ready" ? "default" : "outline"}
@@ -221,7 +324,7 @@
         onclick={() => (selectedTab = "ready")}
         class="text-xs rounded-full"
       >
-        Ready for Pickup ({reservations.filter((r) => r.status === "ready")
+        Ready for Pickup ({enrichedReservations.filter((r) => r.status === "ready")
           .length})
       </Button>
       <Button
@@ -230,8 +333,8 @@
         onclick={() => (selectedTab = "completed")}
         class="text-xs rounded-full"
       >
-        Completed ({reservations.filter(
-          (r) => r.status === "completed" || r.status === "delivered",
+        Completed ({enrichedReservations.filter(
+          (r) => r.status === "completed" || r.status === "delivered"
         ).length})
       </Button>
     </div>
@@ -310,12 +413,20 @@
 
                 <Table.Cell class="text-xs">
                   <div class="space-y-1">
-                    {#if res.hasRxRequired}
+                    {#if res.prescriptionImageUrl}
                       <Badge
                         variant="outline"
-                        class="text-[10px] bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-300"
+                        class="text-[10px] bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300 font-medium"
                       >
-                        <FileText class="w-3 h-3 mr-1" /> Rx Required
+                        <FileText class="w-3 h-3 mr-1 text-emerald-600" />
+                        {isPdf(res.prescriptionImageUrl) ? "Rx PDF Attached" : "Rx Image Attached"}
+                      </Badge>
+                    {:else if res.hasRxRequired}
+                      <Badge
+                        variant="outline"
+                        class="text-[10px] bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-300 font-medium"
+                      >
+                        <AlertTriangle class="w-3 h-3 mr-1 text-rose-600" /> Rx Missing!
                       </Badge>
                     {:else}
                       <Badge
@@ -326,14 +437,13 @@
                       </Badge>
                     {/if}
 
-                    {#if res.allConflicts.length > 0}
+                    {#if (res.allConflicts || []).length > 0}
                       <div>
                         <Badge
                           variant="outline"
                           class="text-[10px] bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-300"
                         >
-                          <AlertTriangle class="w-3 h-3 mr-1" /> Safety Warning ({res
-                            .allConflicts.length})
+                          <AlertTriangle class="w-3 h-3 mr-1" /> Safety Warning ({(res.allConflicts || []).length})
                         </Badge>
                       </div>
                     {/if}
@@ -341,7 +451,7 @@
                 </Table.Cell>
 
                 <Table.Cell class="font-semibold text-xs">
-                  ${res.totalCosting.toFixed(2)}
+                  ৳{res.totalCosting.toFixed(2)}
                 </Table.Cell>
 
                 <Table.Cell>
@@ -409,10 +519,10 @@
     </div>
   </div>
 
-  <!-- Detailed Reservation & Prescription Verification Modal -->
+  <!-- Detailed Reservation & AI OCR Prescription Verification Modal -->
   {#if selectedReservation}
     <Dialog.Root bind:open={isDetailOpen}>
-      <Dialog.Content class="sm:max-w-[650px] max-h-[85vh] overflow-y-auto">
+      <Dialog.Content class="sm:max-w-[750px] max-h-[90vh] overflow-y-auto">
         <Dialog.Header>
           <div class="flex items-center justify-between">
             <Dialog.Title class="text-xl font-bold flex items-center gap-2">
@@ -426,8 +536,7 @@
             </Badge>
           </div>
           <Dialog.Description class="text-xs">
-            Review customer order, prescription document, and drug interaction
-            risks.
+            Review customer order, AI OCR prescription analysis (PDF / Image), and drug interaction safety.
           </Dialog.Description>
         </Dialog.Header>
 
@@ -450,7 +559,7 @@
               >
               <strong class="text-foreground"
                 >{new Date(
-                  selectedReservation.pickupDate,
+                  selectedReservation.pickupDate
                 ).toLocaleDateString()}</strong
               >
             </div>
@@ -459,7 +568,7 @@
                 >Total Amount:</span
               >
               <strong class="text-emerald-600 dark:text-emerald-400 text-sm"
-                >${selectedReservation.totalCosting.toFixed(2)}</strong
+                >৳{selectedReservation.totalCosting.toFixed(2)}</strong
               >
             </div>
           </div>
@@ -489,8 +598,8 @@
                       <Table.Cell class="py-2">{item.quantity} units</Table.Cell
                       >
                       <Table.Cell class="py-2 text-right"
-                        >${(item.unitSellingPrice * item.quantity).toFixed(
-                          2,
+                        >৳{(item.unitSellingPrice * item.quantity).toFixed(
+                          2
                         )}</Table.Cell
                       >
                     </Table.Row>
@@ -500,49 +609,178 @@
             </div>
           </div>
 
-          <!-- Prescription Verification Box -->
-          <div class="space-y-2">
-            <h4
-              class="font-bold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
-            >
-              <FileText class="w-4 h-4 text-purple-600" /> Prescription Document
-            </h4>
-            {#if selectedReservation.prescription}
+          <!-- Prescription Verification & AI OCR Verdict Box -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <h4
+                class="font-bold text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
+              >
+                <FileText class="w-4 h-4 text-purple-600" /> Doctor Prescription & AI OCR Verification
+              </h4>
+
+              {#if selectedReservation.prescriptionImageUrl || selectedReservation.prescription}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onclick={() => runOcrScan(selectedReservation)}
+                  disabled={isOcrScanning}
+                  class="text-xs h-7 gap-1"
+                >
+                  <RefreshCw class="w-3 h-3 {isOcrScanning ? 'animate-spin' : ''}" />
+                  Re-scan with AI OCR
+                </Button>
+              {/if}
+            </div>
+
+            {#if selectedReservation.prescriptionImageUrl || selectedReservation.prescription}
+              {@const docUrl = selectedReservation.prescriptionImageUrl || selectedReservation.prescription}
               <div
                 class="p-4 rounded-lg border border-purple-200 bg-purple-50/50 dark:bg-purple-950/20 dark:border-purple-900 flex flex-col items-center gap-3 text-center"
               >
-                <FileText class="w-12 h-12 text-purple-600 opacity-80" />
+                {#if isPdf(docUrl)}
+                  <div class="w-full space-y-2">
+                    <div class="flex items-center justify-center gap-2 text-xs font-semibold text-purple-900 dark:text-purple-300">
+                      <FileText class="h-5 w-5 text-purple-600" />
+                      Prescription Document (PDF Format)
+                    </div>
+                    <iframe
+                      src={docUrl}
+                      class="w-full h-80 rounded-lg border shadow-sm bg-white"
+                      title="Prescription PDF Viewer"
+                    ></iframe>
+                  </div>
+                {:else}
+                  <img
+                    src={docUrl}
+                    alt="Prescription Document"
+                    class="max-h-72 max-w-full rounded-lg object-contain border shadow-sm"
+                  />
+                {/if}
+
                 <div>
                   <p
                     class="font-semibold text-xs text-purple-900 dark:text-purple-300"
                   >
-                    Prescription Attached & Uploaded
+                    Prescription Attached & Uploaded by Customer
                   </p>
                   <p class="text-[11px] text-muted-foreground">
-                    Document verified for customer {selectedReservation.customerEmail}
+                    Verified for {selectedReservation.customerEmail}
                   </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onclick={() =>
-                    toast.info(
-                      "Opening high-resolution prescription viewer...",
-                    )}
-                  class="text-xs bg-background"
-                >
-                  View Full Prescription Document
-                </Button>
+
+                <div class="flex flex-wrap items-center justify-center gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onclick={() => (viewDocUrl = docUrl)}
+                    class="text-xs font-semibold gap-1.5"
+                  >
+                    <Maximize2 class="w-3.5 h-3.5 text-primary" /> View in App Modal
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onclick={() => openDocument(docUrl)}
+                    class="text-xs bg-background font-semibold gap-1.5"
+                  >
+                    <ExternalLink class="w-3.5 h-3.5" /> Open PDF / Image in New Window
+                  </Button>
+                </div>
               </div>
+
+              <!-- AI OCR Scanner Verdict Component -->
+              {#if isOcrScanning}
+                <div class="p-4 rounded-xl bg-purple-500/10 border border-purple-300 flex items-center justify-center gap-3">
+                  <Sparkles class="h-5 w-5 text-purple-600 animate-spin" />
+                  <div class="text-xs font-semibold text-purple-900 dark:text-purple-300">
+                    AI OCR Scanner analyzing prescription document & verifying required medications...
+                  </div>
+                </div>
+              {:else if ocrVerdict}
+                <div class="p-4 rounded-xl border space-y-3.5 text-left {ocrVerdict.status === 'VERIFIED' ? 'bg-emerald-500/10 border-emerald-400' : 'bg-amber-500/10 border-amber-400'}">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                      <Brain class="h-5 w-5 text-purple-600" />
+                      <span class="font-bold text-xs uppercase tracking-wider">AI OCR Clinical Verdict</span>
+                    </div>
+                    <Badge variant="outline" class="text-xs font-bold {ocrVerdict.status === 'VERIFIED' ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'}">
+                      {ocrVerdict.status === 'VERIFIED' ? '✓ VERIFIED MATCH' : '⚠ VERIFICATION NOTICE'} ({ocrVerdict.confidenceScore}% confidence)
+                    </Badge>
+                  </div>
+
+                  <p class="text-xs font-semibold text-foreground leading-relaxed">
+                    {ocrVerdict.verdictSummary}
+                  </p>
+
+                  <div class="grid grid-cols-2 gap-2 text-[11px] bg-background/70 p-2.5 rounded-lg border">
+                    <div>
+                      <span class="text-muted-foreground block font-medium">Prescribing Doctor:</span>
+                      <strong class="text-foreground">{ocrVerdict.detectedDoctor}</strong>
+                    </div>
+                    <div>
+                      <span class="text-muted-foreground block font-medium">Prescription Date:</span>
+                      <strong class="text-foreground">{ocrVerdict.detectedDate}</strong>
+                    </div>
+                  </div>
+
+                  <!-- Medicine Match Verification List -->
+                  <div class="space-y-1.5 pt-1">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Medicine Verification Checklist:</p>
+                    {#each ocrVerdict.rxItemsMatch as match}
+                      <div class="p-2.5 rounded-lg bg-background/90 text-xs border space-y-1">
+                        <div class="flex items-center justify-between">
+                          <div class="flex items-center gap-2">
+                            {#if match.matchStatus === 'MATCHED'}
+                              <CheckCircle2 class="h-4 w-4 text-emerald-600 shrink-0" />
+                            {:else if match.matchStatus === 'NOT_REQUIRED'}
+                              <Pill class="h-4 w-4 text-blue-600 shrink-0" />
+                            {:else}
+                              <XCircle class="h-4 w-4 text-rose-600 shrink-0" />
+                            {/if}
+                            <div>
+                              <span class="font-semibold text-foreground">{match.medicineName}</span>
+                              {#if match.genericName}
+                                <span class="text-[10px] text-muted-foreground ml-1">({match.genericName})</span>
+                              {/if}
+                            </div>
+                          </div>
+
+                          {#if match.matchStatus === 'MATCHED'}
+                            <Badge variant="outline" class="text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-400">
+                              ✓ FOUND IN PDF
+                            </Badge>
+                          {:else if match.matchStatus === 'NOT_REQUIRED'}
+                            <Badge variant="outline" class="text-[10px] font-semibold text-muted-foreground">
+                              OTC (No Rx Needed)
+                            </Badge>
+                          {:else}
+                            <Badge variant="outline" class="text-[10px] font-bold bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-400">
+                              ✕ NOT FOUND IN PDF
+                            </Badge>
+                          {/if}
+                        </div>
+                        {#if match.note}
+                          <p class="text-[11px] text-muted-foreground pl-6">
+                            {match.note}
+                          </p>
+                        {/if}
+                      </div>
+                    {/each}
+                  </div>
+
+                  <p class="text-[11px] text-muted-foreground italic border-t border-border/60 pt-2">
+                    <strong class="text-foreground">Pharmacist Verdict Advice:</strong> {ocrVerdict.pharmacistRecommendation}
+                  </p>
+                </div>
+              {/if}
             {:else if selectedReservation.hasRxRequired}
               <div
-                class="p-3.5 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-300 text-xs flex items-center gap-2"
+                class="p-3.5 rounded-lg border border-rose-300 bg-rose-50 dark:bg-rose-950/30 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2"
               >
-                <AlertTriangle class="w-5 h-5 flex-shrink-0 text-amber-600" />
-                <span
-                  >Notice: One or more medicines require a valid doctor
-                  prescription. Verification mandatory before approval.</span
-                >
+                <AlertTriangle class="w-5 h-5 flex-shrink-0 text-rose-600" />
+                <span>
+                  <strong>Rx Missing!</strong> One or more medicines require a valid doctor prescription, but no document was attached by the customer.
+                </span>
               </div>
             {:else}
               <p
@@ -554,7 +792,7 @@
           </div>
 
           <!-- Drug Interaction Banners -->
-          {#if selectedReservation.allConflicts.length > 0}
+          {#if (selectedReservation.allConflicts || []).length > 0}
             <div class="space-y-2">
               <h4
                 class="font-bold text-xs uppercase tracking-wider text-amber-600 flex items-center gap-1.5"
@@ -634,6 +872,64 @@
       </Dialog.Content>
     </Dialog.Root>
   {/if}
+
+  <!-- Full Document / PDF Viewer Modal -->
+  <Dialog.Root open={!!viewDocUrl} onOpenChange={(v) => { if (!v) viewDocUrl = null; }}>
+    <Dialog.Content class="sm:max-w-[850px] max-h-[95vh]">
+      <Dialog.Header>
+        <Dialog.Title class="text-base font-bold flex items-center gap-2">
+          <FileText class="h-5 w-5 text-purple-600" /> Prescription Document Viewer
+        </Dialog.Title>
+        <Dialog.Description class="text-xs">
+          High-resolution document viewer for pharmacist verification.
+        </Dialog.Description>
+      </Dialog.Header>
+      
+      <div class="py-2 space-y-3">
+        {#if isPdf(viewDocUrl ?? "")}
+          <iframe
+            src={viewDocUrl ?? ""}
+            class="w-full h-[550px] rounded-lg border shadow-inner bg-white"
+            title="Prescription PDF Viewer"
+          ></iframe>
+        {:else}
+          <div class="max-h-[550px] overflow-auto flex items-center justify-center bg-black/5 p-4 rounded-lg border">
+            <img
+              src={viewDocUrl ?? ""}
+              alt="Prescription Full Resolution"
+              class="max-h-[500px] w-auto rounded-lg shadow-md object-contain"
+            />
+          </div>
+        {/if}
+
+        <!-- AI OCR Scanner Card inside viewer modal as well -->
+        {#if ocrVerdict}
+          <div class="p-3.5 rounded-xl border bg-purple-500/5 border-purple-300 text-left text-xs space-y-2">
+            <div class="flex items-center justify-between font-bold">
+              <span class="flex items-center gap-1.5"><Brain class="h-4 w-4 text-purple-600" /> AI OCR Summary Verdict:</span>
+              <Badge variant="outline" class="text-[10px] font-bold bg-purple-600 text-white">{ocrVerdict.status} ({ocrVerdict.confidenceScore}%)</Badge>
+            </div>
+            <p class="text-muted-foreground">{ocrVerdict.verdictSummary}</p>
+            <p class="italic text-[11px] text-purple-900 dark:text-purple-300"><strong>Advice:</strong> {ocrVerdict.pharmacistRecommendation}</p>
+          </div>
+        {/if}
+      </div>
+
+      <Dialog.Footer class="gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onclick={() => openDocument(viewDocUrl ?? "")}
+          class="text-xs font-semibold gap-1.5"
+        >
+          <ExternalLink class="h-3.5 w-3.5" /> Open in Separate Window
+        </Button>
+        <Button variant="secondary" size="sm" onclick={() => (viewDocUrl = null)} class="text-xs">
+          Close Viewer
+        </Button>
+      </Dialog.Footer>
+    </Dialog.Content>
+  </Dialog.Root>
 
   <!-- Rejection Confirmation Dialog -->
   <Dialog.Root bind:open={isRejectOpen}>
