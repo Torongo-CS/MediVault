@@ -18,6 +18,9 @@
     Info,
     Tag,
     Upload,
+    Store,
+    MapPin,
+    Phone,
   } from "lucide-svelte";
   import { onMount } from "svelte";
   import { convex } from "$lib/convexClient";
@@ -48,15 +51,18 @@
     };
   });
 
-  const pharmacyObj = $derived(() => {
+  const pharmacyObj = $derived.by(() => {
     const found = dbPharmacies.find((p) => p._id === pharmacyId);
     return {
       id: pharmacyId,
       name: found ? found.name : "Pharmacy Store",
+      address: found?.address || "Dhaka, Bangladesh",
+      phone: found?.phone || "+880 1700-000000",
+      operatingHours: found?.operatingHours || "08:00 AM - 10:00 PM",
     };
   });
 
-  const medicineObj = $derived(() => {
+  const medicineObj = $derived.by(() => {
     if (dbMedicine) {
       return {
         medicineId: dbMedicine._id,
@@ -85,7 +91,7 @@
     };
   });
 
-  const inStock = $derived(medicineObj().stock > 0);
+  const inStock = $derived(medicineObj.stock > 0);
   const cartQty = $derived(cart.getItemQuantity(medicineId));
   const isInCart = $derived(cartQty > 0);
 
@@ -103,8 +109,8 @@
   }
 
   function handleAddToCart() {
-    const med = medicineObj();
-    const pharm = pharmacyObj();
+    const med = medicineObj;
+    const pharm = pharmacyObj;
     const result = cart.addItem(pharmacyId, pharm.name, {
       medicineId: med.medicineId,
       medicineName: med.name,
@@ -135,10 +141,10 @@
     isExplaining = true;
     aiExplanation = "";
     setTimeout(() => {
-      const med = medicineObj();
+      const med = medicineObj;
       aiExplanation =
         `${med.name} (${med.genericName}) is prescribed or used for ${med.symptoms.join(", ") || "general symptoms"}. ` +
-        `It is available from ${pharmacyObj().name} for ৳${med.unitPrice.toFixed(2)} per unit. ` +
+        `It is available from ${pharmacyObj.name} for ৳${med.unitPrice.toFixed(2)} per unit. ` +
         (med.requiresPrescription ? "Note: A valid doctor prescription is required to fulfill this medicine." : "This is an OTC medicine and does not require a prescription.");
       isExplaining = false;
     }, 1200);
@@ -158,8 +164,8 @@
 
 <div class="space-y-6 max-w-5xl">
   <PageHeader
-    title={medicineObj().name}
-    subtitle={medicineObj().genericName}
+    title={medicineObj.name}
+    subtitle={medicineObj.genericName}
     showBack={true}
     backHref="/pharmacy/{pharmacyId}"
   />
@@ -170,7 +176,7 @@
     <div class="lg:col-span-2">
       <div
         class="rounded-xl overflow-hidden aspect-square flex items-center justify-center"
-        style:background={getGradient(medicineObj().name)}
+        style:background={getGradient(medicineObj.name)}
       >
         <Pill class="h-20 w-20 text-white/70 drop-shadow-lg" />
       </div>
@@ -178,16 +184,33 @@
 
     <!-- Right: Details -->
     <div class="lg:col-span-3 space-y-5">
+      <!-- Pharmacy Store Tag -->
+      <div class="p-3 rounded-xl bg-primary/5 border border-primary/15 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <Store class="h-4 w-4 text-primary shrink-0" />
+          <div>
+            <p class="text-xs font-bold text-foreground">{pharmacyObj.name}</p>
+            <p class="text-[11px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
+              <MapPin class="h-3 w-3 text-muted-foreground shrink-0" />
+              {pharmacyObj.address}
+            </p>
+          </div>
+        </div>
+        <Badge variant="outline" class="text-[10px] font-semibold">
+          1-on-1 Dispensary
+        </Badge>
+      </div>
+
       <!-- Name & Generic -->
       <div>
-        <h1 class="text-2xl font-bold text-foreground mb-1">{medicineObj().name}</h1>
-        <p class="text-sm text-muted-foreground">{medicineObj().genericName}</p>
+        <h1 class="text-2xl font-bold text-foreground mb-1">{medicineObj.name}</h1>
+        <p class="text-sm text-muted-foreground">{medicineObj.genericName}</p>
       </div>
 
       <!-- Price & Stock -->
       <div class="flex items-center gap-4">
         <span class="text-3xl font-bold text-primary">
-          ৳{medicineObj().unitPrice.toFixed(2)}
+          ৳{medicineObj.unitPrice.toFixed(2)}
         </span>
         <span class="text-xs text-muted-foreground">/unit</span>
         <div class="ml-auto">
@@ -197,7 +220,7 @@
               class="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 font-semibold"
             >
               <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-              {medicineObj().stock} in stock
+              {medicineObj.stock} in stock
             </Badge>
           {:else}
             <Badge variant="destructive" class="font-semibold">Out of Stock</Badge>
@@ -206,7 +229,7 @@
       </div>
 
       <!-- Rx Warning -->
-      {#if medicineObj().requiresPrescription}
+      {#if medicineObj.requiresPrescription}
         <div
           class="flex items-start gap-2.5 p-4 rounded-xl bg-amber-500/10 border border-amber-500/20"
         >
@@ -237,9 +260,9 @@
           Description
         </h3>
         <p class="text-sm text-muted-foreground leading-relaxed {showFullDescription ? '' : 'line-clamp-3'}">
-          {medicineObj().description}
+          {medicineObj.description}
         </p>
-        {#if medicineObj().description && medicineObj().description.length > 150}
+        {#if medicineObj.description && medicineObj.description.length > 150}
           <button
             class="text-xs text-primary font-semibold mt-1 hover:underline"
             onclick={() => (showFullDescription = !showFullDescription)}
@@ -250,14 +273,14 @@
       </div>
 
       <!-- Symptoms Tags -->
-      {#if medicineObj().symptoms.length > 0}
+      {#if medicineObj.symptoms.length > 0}
         <div>
           <h3 class="text-xs font-bold text-foreground uppercase tracking-wider mb-2 flex items-center gap-1.5">
             <Tag class="h-3.5 w-3.5" />
             Used for
           </h3>
           <div class="flex flex-wrap gap-1.5">
-            {#each medicineObj().symptoms as symptom}
+            {#each medicineObj.symptoms as symptom}
               <Badge variant="secondary" class="text-xs px-2 py-0.5 font-medium">{symptom}</Badge>
             {/each}
           </div>
@@ -268,11 +291,11 @@
       <div class="flex gap-6 text-xs text-muted-foreground">
         <span class="flex items-center gap-1.5">
           <Calendar class="h-3.5 w-3.5" />
-          Mfg: {formatDate(medicineObj().mfgDate)}
+          Mfg: {formatDate(medicineObj.mfgDate)}
         </span>
         <span class="flex items-center gap-1.5">
           <Calendar class="h-3.5 w-3.5" />
-          Exp: {formatDate(medicineObj().expiryDate)}
+          Exp: {formatDate(medicineObj.expiryDate)}
         </span>
       </div>
 
@@ -285,13 +308,13 @@
               {#if isInCart}
                 <QuantitySelector
                   value={cartQty}
-                  max={medicineObj().stock}
+                  max={medicineObj.stock}
                   onchange={(qty) => cart.updateQuantity(medicineId, qty)}
                 />
               {:else}
                 <QuantitySelector
                   value={selectedQty}
-                  max={medicineObj().stock}
+                  max={medicineObj.stock}
                   onchange={(qty) => (selectedQty = qty)}
                 />
               {/if}
@@ -299,10 +322,10 @@
 
             <div class="text-right">
               <p class="text-lg font-bold text-foreground">
-                ৳{(medicineObj().unitPrice * (isInCart ? cartQty : selectedQty)).toFixed(2)}
+                ৳{(medicineObj.unitPrice * (isInCart ? cartQty : selectedQty)).toFixed(2)}
               </p>
               <p class="text-[10px] text-muted-foreground">
-                ৳{medicineObj().unitPrice.toFixed(2)} × {isInCart ? cartQty : selectedQty}
+                ৳{medicineObj.unitPrice.toFixed(2)} × {isInCart ? cartQty : selectedQty}
               </p>
             </div>
           </div>

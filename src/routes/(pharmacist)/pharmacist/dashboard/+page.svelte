@@ -25,21 +25,23 @@
 
   // Reactive state — live from Convex
   let reservations = $state<any[]>([]);
-  let medicines = $state<any[]>([...dummyData.medicines]);
-  let transactions = $state([...dummyData.transactionRecords]);
+  let medicines = $state<any[]>([]);
+  let transactions = $state<any[]>([]);
 
-  onMount(() => {
+  $effect(() => {
+    const userId = data?.user?._id;
+
     const unsubRes = convex.onUpdate(api.reservations.listAllWithDetails, {}, (resData) => {
       if (resData) {
         reservations = resData.filter(
-          (r) => !r.pharmacistId || r.pharmacistId === data?.user?._id
+          (r) => !r.pharmacistId || r.pharmacistId === userId
         );
       }
     });
 
     const unsubMeds = convex.onUpdate(
       api.medicines.listByPharmacist,
-      { pharmacistId: data?.user?._id as any },
+      { pharmacistId: userId as any },
       (medData) => {
         if (medData) medicines = medData;
       }

@@ -22,12 +22,12 @@
     TrendingUp, 
     Minus, 
     RotateCcw,
-    Pill
+    Pill,
+    Store,
+    MapPin,
+    Building2
   } from "lucide-svelte";
 
-  import { onMount } from "svelte";
-  import { convex } from "$lib/convexClient";
-  import { api } from "../../../../../convex/_generated/api";
 
   let { data } = $props();
 
@@ -36,10 +36,13 @@
   let searchQuery = $state("");
   let selectedFilter = $state("all");
 
-  onMount(() => {
+  $effect(() => {
+    const userId = data?.user?._id;
+    if (!userId) return;
+
     const unsub = convex.onUpdate(
       api.medicines.listByPharmacist,
-      { pharmacistId: data?.user?._id as any },
+      { pharmacistId: userId as any },
       (liveMeds) => {
         if (liveMeds) medicines = liveMeds;
       }
@@ -65,12 +68,51 @@
   let formConflicts = $state("");
   let formExpiryDate = $state("2026-12-31");
 
-  onMount(() => {
-    const unsubscribe = convex.onUpdate(api.medicines.list, {}, (data) => {
-      medicines = data;
+  let dbPharmacies = $state<any[]>([]);
+  let isSwitching = $state(false);
+
+  $effect(() => {
+    const unsubP = convex.onUpdate(api.users.listPharmacies, {}, (pharmData) => {
+      if (pharmData) dbPharmacies = pharmData;
     });
-    return unsubscribe;
+    return () => unsubP();
   });
+
+  const activeStore = $derived.by(() => {
+    const userId = data?.user?._id;
+    const found = dbPharmacies.find((p) => p._id === userId);
+    return {
+      id: userId,
+      name: found?.name || data?.user?.name || "Pharmacist Store",
+      email: data?.user?.email || "",
+      address: found?.address || "Dhaka, Bangladesh",
+      phone: found?.phone || "+880 1700-000000",
+      operatingHours: found?.operatingHours || "08:00 AM - 10:00 PM",
+    };
+  });
+
+  async function switchStoreAccount(email: string) {
+    if (!email || email === data?.user?.email) return;
+    isSwitching = true;
+    try {
+      const res = await fetch("/api/auth/switch-store", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(`Switched account to ${result.user.name || email}!`);
+        window.location.reload();
+      } else {
+        toast.error(result.error || "Failed to switch store account");
+      }
+    } catch (err: any) {
+      toast.error("Failed to switch store account");
+    } finally {
+      isSwitching = false;
+    }
+  }
 
   // Derived filtered medicines
   let filteredMedicines = $derived(
@@ -232,6 +274,59 @@
     <Button onclick={openAddModal} class="gap-2 shadow-sm bg-primary text-primary-foreground">
       <Plus class="w-4 h-4" /> Add New Medicine
     </Button>
+  </div>
+
+  <!-- Active Store Context & Switcher Banner -->
+  <div class="rounded-xl border bg-card p-4 sm:p-5 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="h-11 w-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+        <Store class="h-5 w-5 text-primary" />
+      </div>
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h2 class="text-base font-bold text-foreground">{activeStore.name}</h2>
+          {#if activeStore.email}
+            <Badge variant="secondary" class="text-[10px] font-semibold bg-primary/10 text-primary border-primary/20">
+              {activeStore.email}
+            </Badge>
+          {/if}
+        </div>
+        <p class="text-xs text-muted-foreground flex items-center gap-3 mt-1">
+          <span class="flex items-center gap-1">
+            <MapPin class="h-3 w-3 text-muted-foreground shrink-0" />
+            {activeStore.address}
+          </span>
+          <span>•</span>
+          <span>Hours: {activeStore.operatingHours}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick Account Switcher -->
+    <div class="flex items-center gap-2 w-full md:w-auto">
+      <span class="text-xs font-semibold text-muted-foreground shrink-0">Store Account:</span>
+      <select
+        class="text-xs font-medium bg-background border rounded-lg px-2.5 py-1.5 focus:ring-1 focus:ring-primary outline-none cursor-pointer"
+        disabled={isSwitching}
+        onchange={(e) => switchStoreAccount((e.target as HTMLSelectElement).value)}
+      >
+        <option value="pharmacist@medivault.com" selected={activeStore.email === 'pharmacist@medivault.com'}>
+          🏥 HealthPlus Pharmacy (pharmacist@medivault.com)
+        </option>
+        <option value="carepoint@medivault.com" selected={activeStore.email === 'carepoint@medivault.com'}>
+          🏥 CarePoint Medical Store (carepoint@medivault.com)
+        </option>
+        <option value="medicare@medivault.com" selected={activeStore.email === 'medicare@medivault.com'}>
+          🏥 MediCare Family Store (medicare@medivault.com)
+        </option>
+        <option value="greencross@medivault.com" selected={activeStore.email === 'greencross@medivault.com'}>
+          🏥 Green Cross Dispensary (greencross@medivault.com)
+        </option>
+        <option value="lazzpharma@medivault.com" selected={activeStore.email === 'lazzpharma@medivault.com'}>
+          🏥 Lazz Pharma Motijheel (lazzpharma@medivault.com)
+        </option>
+      </select>
+    </div>
   </div>
 
   <!-- Search & Quick Filter Controls -->

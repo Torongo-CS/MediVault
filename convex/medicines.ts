@@ -194,12 +194,22 @@ export const listByPharmacist = query({
     pharmacistId: v.optional(v.id("users")),
   },
   handler: async (ctx, args) => {
-    if (args.pharmacistId) {
-      return await ctx.db
-        .query("medicines")
-        .withIndex("by_pharmacist", (q) => q.eq("pharmacistId", args.pharmacistId))
-        .collect();
+    if (!args.pharmacistId) {
+      return [];
     }
+    return await ctx.db
+      .query("medicines")
+      .withIndex("by_pharmacist", (q) => q.eq("pharmacistId", args.pharmacistId))
+      .collect();
+  },
+});
+
+/**
+ * Query: List all medicines across all pharmacies (for admin panel or global catalog).
+ */
+export const listAll = query({
+  args: {},
+  handler: async (ctx) => {
     return await ctx.db.query("medicines").collect();
   },
 });
@@ -349,26 +359,6 @@ export const updateMedicine = mutation({
 });
 
 /**
- * Mutation: Quick stock adjustment (increment / decrement).
- */
-export const adjustStock = mutation({
-  args: {
-    medicineId: v.id("medicines"),
-    delta: v.number(),
-  },
-  handler: async (ctx, args) => {
-    const med = await ctx.db.get(args.medicineId);
-    if (!med) {
-      throw new Error("Medicine not found.");
-    }
-
-    const newStock = Math.max(0, med.stock + args.delta);
-    await ctx.db.patch(args.medicineId, { stock: newStock });
-    return newStock;
-  },
-});
-
-/**
  * Mutation: Delete a medicine record from the database.
  */
 export const deleteMedicine = mutation({
@@ -380,7 +370,11 @@ export const deleteMedicine = mutation({
     if (!med) {
       throw new Error("Medicine record not found.");
     }
+    if (med.reservedQuantity && med.reservedQuantity > 0) {
+      throw new Error("Cannot delete medicine with reserved stock.");
+    }
     await ctx.db.delete(args.medicineId);
     return true;
   },
 });
+
