@@ -420,7 +420,7 @@
   /* 4. Resizable Handle & Collapse Alignment */
   [data-sidebar="rail"] {
     @apply w-2 hover:w-2.5 bg-transparent hover:bg-primary/20 cursor-col-resize;
-    @apply transition-all duration-200 ease-in-out border-l-2 border-border/40;
+    @apply transition-all duration-200 ease-in-out;
   }
 
   /* Global Page Transition Shutter Overlay */
