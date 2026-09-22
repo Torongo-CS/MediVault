@@ -592,10 +592,35 @@
     {
       "_id": "ticket_1",
       "creatorId": "user_3",
+      "targetId": "user_1",
+      "targetType": "admin",
+      "category": "Overcharging / Refund Issue",
       "title": "Pharmacist refused refund after overcharging",
       "status": "open",
       "createdAt": 1704067200000,
       "updatedAt": 1704068200000
+    },
+    {
+      "_id": "ticket_2",
+      "creatorId": "user_3",
+      "targetId": "user_2",
+      "targetType": "pharmacist",
+      "category": "Medicine Review & Dosage Inquiry",
+      "title": "Paracetamol Extra dosage & review inquiry",
+      "status": "open",
+      "createdAt": 1704153600000,
+      "updatedAt": 1704154000000
+    },
+    {
+      "_id": "ticket_3",
+      "creatorId": "user_ph_2",
+      "targetId": "user_1",
+      "targetType": "admin",
+      "category": "Inventory Audit Support",
+      "title": "Inventory stock verification request",
+      "status": "resolved",
+      "createdAt": 1704240000000,
+      "updatedAt": 1704245000000
     }
   ],
   "complaintMessages": [
@@ -603,8 +628,43 @@
       "_id": "msg_1",
       "ticketId": "ticket_1",
       "senderId": "user_3",
-      "message": "Hello Admin, I visited the pharmacy today. Please assist with my order.",
+      "message": "Hello Admin, I visited HealthPlus Pharmacy today. I was overcharged for Paracetamol. Please assist with my refund.",
       "timestamp": 1704067200000
+    },
+    {
+      "_id": "msg_2",
+      "ticketId": "ticket_1",
+      "senderId": "user_1",
+      "message": "Hello Jane, we have logged your complaint and contacted HealthPlus Pharmacy regarding the price discrepancy.",
+      "timestamp": 1704068200000
+    },
+    {
+      "_id": "msg_3",
+      "ticketId": "ticket_2",
+      "senderId": "user_3",
+      "message": "Hi HealthPlus Pharmacist, I have a question about Paracetamol Extra 650mg dosage and side effects.",
+      "timestamp": 1704153600000
+    },
+    {
+      "_id": "msg_4",
+      "ticketId": "ticket_2",
+      "senderId": "user_2",
+      "message": "Hello Jane! Paracetamol 650mg is for severe fever or pain. Do not exceed 4 tablets in 24 hours. Let us know if you need anything else.",
+      "timestamp": 1704154000000
+    },
+    {
+      "_id": "msg_5",
+      "ticketId": "ticket_3",
+      "senderId": "user_ph_2",
+      "message": "Greetings Admin, please review our store's recent batch of Azithromycin stock.",
+      "timestamp": 1704240000000
+    },
+    {
+      "_id": "msg_6",
+      "ticketId": "ticket_3",
+      "senderId": "user_1",
+      "message": "Verified! Your inventory records have been approved.",
+      "timestamp": 1704245000000
     }
   ],
   "notifications": [

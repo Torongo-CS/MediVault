@@ -263,8 +263,13 @@ export const seedFromDummyData = internalMutation({
       const creatorId = userIdMap[ticket.creatorId];
       if (!creatorId) continue;
 
+      const targetId = ticket.targetId ? userIdMap[ticket.targetId] : undefined;
+
       const insertedId = await ctx.db.insert("complaintTickets", {
         creatorId,
+        targetId,
+        targetType: (ticket.targetType as any) ?? "admin",
+        category: ticket.category ?? "General",
         title: ticket.title,
         status: ticket.status as "open" | "resolved",
         createdAt: ticket.createdAt,

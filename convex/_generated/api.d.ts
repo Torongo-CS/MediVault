@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
+import type * as complaints from "../complaints.js";
 import type * as medicines from "../medicines.js";
 import type * as notifications from "../notifications.js";
 import type * as prescriptions from "../prescriptions.js";
@@ -26,6 +27,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
+  complaints: typeof complaints;
   medicines: typeof medicines;
   notifications: typeof notifications;
   prescriptions: typeof prescriptions;

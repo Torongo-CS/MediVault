@@ -93,15 +93,20 @@ export default defineSchema({
   })
     .index("by_customer", ["customerId"]),
 
-  // 6. COMPLAINT TICKETS (The parent ticket thread)
+  // 6. COMPLAINT TICKETS (The parent ticket thread / 1-on-1 chat channel)
   complaintTickets: defineTable({
-    creatorId: v.id("users"), // Customer or Pharmacist filing the complaint
+    creatorId: v.id("users"), // User filing the complaint / starting chat
+    targetId: v.optional(v.id("users")), // Specific target user ID for 1-on-1 chat
+    targetType: v.optional(v.union(v.literal("admin"), v.literal("pharmacist"), v.literal("customer"))),
+    category: v.optional(v.string()),
     title: v.string(),
     status: v.union(v.literal("open"), v.literal("resolved")),
     createdAt: v.number(),
-    updatedAt: v.number(), // Allows admin panel to sort by the thread with the newest reply
+    updatedAt: v.number(), // Sort threads by newest activity
   })
     .index("by_creator", ["creatorId"])
+    .index("by_target", ["targetId"])
+    .index("by_targetType", ["targetType"])
     .index("by_status", ["status"])
     .index("by_updatedAt", ["updatedAt"]),
 
