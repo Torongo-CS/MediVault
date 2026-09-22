@@ -6,6 +6,7 @@
   import { Textarea } from "$lib/components/ui/textarea";
   import { toast } from "svelte-sonner";
   import dummyData from "../../../../convex/dummyData.json";
+  import { goto } from "$app/navigation";
   import {
     Brain,
     Send,
@@ -18,6 +19,8 @@
     User,
     Pill,
     ShieldAlert,
+    ExternalLink,
+    Database
   } from "lucide-svelte";
 
   interface ChatMessage {
@@ -25,6 +28,7 @@
     role: "assistant" | "user";
     content: string;
     timestamp: string;
+    retrievedCount?: number;
     suggestedMeds: Array<{
       name: string;
       generic: string;
@@ -41,7 +45,7 @@
       id: "1",
       role: "assistant",
       content:
-        "Hello! I am your MediVault AI Health Assistant. Tell me your symptoms, ask about drug interactions, or upload a prescription for instant OCR analysis.",
+        "Hello! I am your MediVault AI Health Assistant powered by our Clinical RAG Engine. Tell me your symptoms, ask about drug interactions, or upload a prescription for instant OCR analysis.",
       timestamp: "10:00 AM",
       suggestedMeds: [],
     },
@@ -118,6 +122,7 @@
             hour: "2-digit",
             minute: "2-digit",
           }),
+          retrievedCount: data.retrievedCount,
           suggestedMeds: data.suggestedMeds || [],
         },
       ];
@@ -242,19 +247,22 @@
                 <Bot class="w-5 h-5" />
               </div>
               <div>
-                <Card.Title class="text-base font-bold"
-                  >AI Clinical Assistant</Card.Title
-                >
-                <Card.Description class="text-xs"
-                  >Powered by MediVault Codex Drug Rules</Card.Description
-                >
+                <Card.Title class="text-base font-bold flex items-center gap-2">
+                  AI Clinical Assistant
+                  <Badge variant="outline" class="text-[10px] bg-primary/10 text-primary font-bold">
+                    ⚡ Clinical RAG Active
+                  </Badge>
+                </Card.Title>
+                <Card.Description class="text-xs">
+                  Retrieval-Augmented Generation powered by Convex Medicines & Symptoms DB
+                </Card.Description>
               </div>
             </div>
             <Badge
               variant="outline"
-              class="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300 text-xs"
+              class="bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-300 text-xs gap-1 font-semibold"
             >
-              AI Active
+              <Database class="w-3 h-3 text-emerald-600" /> RAG Connected
             </Badge>
           </div>
         </Card.Header>
@@ -277,10 +285,10 @@
 
               <div class="space-y-2">
                 <div
-                  class={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                  class={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-line ${
                     msg.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-tr-none"
-                      : "bg-muted/50 border border-border rounded-tl-none text-foreground"
+                      ? "bg-primary text-primary-foreground rounded-tr-none font-medium"
+                      : "bg-muted/50 border border-border rounded-tl-none text-foreground font-normal"
                   }`}
                 >
                   {msg.content}
@@ -290,32 +298,42 @@
                 {#if msg.suggestedMeds && msg.suggestedMeds.length > 0}
                   <div class="space-y-2 pt-1">
                     <div
-                      class="text-[11px] font-bold text-muted-foreground uppercase tracking-wider"
+                      class="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between"
                     >
-                      Suggested Medicines
+                      <span>Retrieved Catalog Suggestions ({msg.suggestedMeds.length})</span>
+                      <span class="text-[10px] text-primary lowercase font-semibold">Click card to check availability</span>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {#each msg.suggestedMeds as med}
+                        <!-- svelte-ignore a11y_click_events_have_key_events -->
+                        <!-- svelte-ignore a11y_no_static_element_interactions -->
                         <div
-                          class="p-3 rounded-xl border border-border/80 bg-card shadow-xs flex items-center justify-between text-xs"
+                          class="p-3 rounded-xl border border-border/80 bg-card shadow-xs flex items-center justify-between text-xs cursor-pointer transition-colors hover:border-primary hover:bg-primary/5"
+                          onclick={() => goto(`/pharmacy?search=${encodeURIComponent(med.generic || med.name)}`)}
                         >
                           <div>
                             <div
-                              class="font-bold text-foreground flex items-center gap-1"
+                              class="font-bold text-foreground flex items-center gap-1.5"
                             >
-                              <Pill class="w-3.5 h-3.5 text-primary" />
-                              {med.name}
+                              <Pill class="w-3.5 h-3.5 text-primary shrink-0" />
+                              <span class="truncate">{med.name}</span>
                             </div>
-                            <div class="text-[10px] text-muted-foreground">
-                              {med.generic}
+                            <div class="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <span>{med.generic}</span>
+                              {#if med.rx}
+                                <span class="bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[9px] px-1 rounded font-bold">Rx</span>
+                              {:else}
+                                <span class="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 text-[9px] px-1 rounded font-bold">OTC</span>
+                              {/if}
                             </div>
                           </div>
-                          <div class="text-right">
+                          <div class="text-right flex items-center gap-1.5">
                             <Badge
                               variant="outline"
-                              class="text-[10px] bg-emerald-500/10 text-emerald-700"
+                              class="text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
                               >{med.price}</Badge
                             >
+                            <ExternalLink class="w-3 h-3 text-muted-foreground" />
                           </div>
                         </div>
                       {/each}

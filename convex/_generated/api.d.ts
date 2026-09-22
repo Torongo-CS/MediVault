@@ -14,6 +14,7 @@ import type * as complaints from "../complaints.js";
 import type * as medicines from "../medicines.js";
 import type * as notifications from "../notifications.js";
 import type * as prescriptions from "../prescriptions.js";
+import type * as rag from "../rag.js";
 import type * as reservations from "../reservations.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   medicines: typeof medicines;
   notifications: typeof notifications;
   prescriptions: typeof prescriptions;
+  rag: typeof rag;
   reservations: typeof reservations;
   seed: typeof seed;
   users: typeof users;
