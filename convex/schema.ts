@@ -83,6 +83,10 @@ export default defineSchema({
     dateUploaded: v.number(),
     imageUrl: v.string(),
     userId: v.id("users"),
+    fileName: v.optional(v.string()),
+    fileType: v.optional(v.string()),
+    fileSize: v.optional(v.number()),
+    notes: v.optional(v.string()),
   })
     .index("by_user", ["userId"]),
 
