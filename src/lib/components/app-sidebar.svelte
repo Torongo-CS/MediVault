@@ -18,7 +18,8 @@
     Package,
     LogOut,
     Shield,
-    Bell
+    Bell,
+    User
   } from "lucide-svelte";
 
   const menuConfig = {
@@ -26,6 +27,7 @@
       label: "Customer Portal",
       items: [
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+        { title: "My Profile", url: "/profile", icon: User },
         { title: "Search Pharmacy", url: "/pharmacy", icon: Pill },
         { title: "Reservations", url: "/reservations", icon: CalendarCheck },
         { title: "Prescriptions", url: "/prescriptions", icon: FileText },
@@ -40,6 +42,7 @@
       label: "Pharmacist WorkSpace",
       items: [
         { title: "Dashboard", url: "/pharmacist/dashboard", icon: LayoutDashboard },
+        { title: "My Profile", url: "/profile", icon: User },
         { title: "Pending Approvals", url: "/pharmacist/approvals", icon: CheckSquare },
         { title: "Inventory Management", url: "/pharmacist/inventory", icon: Package },
         { title: "Delivery Management", url: "/pharmacist/delivery", icon: Users },
@@ -52,6 +55,7 @@
       label: "Admin Console",
       items: [
         { title: "Dashboard", url: "/admin/dashboard", icon: LayoutDashboard },
+        { title: "My Profile", url: "/profile", icon: User },
         { title: "Received Complaint", url: "/admin/Recieved_com", icon: Shield },
         { title: "Users Management", url: "/admin/users", icon: Users },
         { title: "Pharmacists List", url: "/admin/pharmacists", icon: Stethoscope },

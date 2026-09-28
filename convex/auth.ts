@@ -247,6 +247,25 @@ export const createSession = internalMutation({
   },
 });
 
+export const getUserByIdInternal = internalQuery({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args): Promise<Doc<"users"> | null> => {
+    return await ctx.db.get("users", args.userId);
+  },
+});
+
+export const updatePasswordHash = internalMutation({
+  args: {
+    userId: v.id("users"),
+    passwordHash: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      passwordHash: args.passwordHash,
+    });
+  },
+});
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -321,6 +340,58 @@ export const signIn = action({
     }
 
     return await ctx.runMutation(internal.auth.createSession, { userId: user._id });
+  },
+});
+
+export const changePassword = action({
+  args: {
+    userId: v.id("users"),
+    currentPassword: v.string(),
+    newPassword: v.string(),
+  },
+  returns: v.object({ success: v.boolean() }),
+  handler: async (ctx, args) => {
+    if (args.newPassword.length < 8) {
+      throw new ConvexError({
+        code: "PASSWORD_TOO_SHORT",
+        message: "New password must be at least 8 characters long.",
+      });
+    }
+
+    const user: Doc<"users"> | null = await ctx.runQuery(
+      internal.auth.getUserByIdInternal,
+      { userId: args.userId }
+    );
+
+    if (user === null) {
+      throw new ConvexError({
+        code: "USER_NOT_FOUND",
+        message: "User record not found.",
+      });
+    }
+
+    if (!user.passwordHash) {
+      throw new ConvexError({
+        code: "INVALID_CREDENTIALS",
+        message: "Current password invalid.",
+      });
+    }
+
+    const ok = await verifyPassword(args.currentPassword, user.passwordHash);
+    if (!ok) {
+      throw new ConvexError({
+        code: "INVALID_CREDENTIALS",
+        message: "Current password is incorrect.",
+      });
+    }
+
+    const newPasswordHash = await hashPassword(args.newPassword);
+    await ctx.runMutation(internal.auth.updatePasswordHash, {
+      userId: args.userId,
+      passwordHash: newPasswordHash,
+    });
+
+    return { success: true };
   },
 });
 
