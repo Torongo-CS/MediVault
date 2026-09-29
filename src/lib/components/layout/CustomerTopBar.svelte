@@ -3,7 +3,7 @@
   import { Button } from "$lib/components/ui/button";
   import * as Popover from "$lib/components/ui/popover";
   import * as Sidebar from "$lib/components/ui/sidebar";
-  import { ShoppingCart, Bell, Package, CheckCircle2, Clock, ChevronRight, MessageSquare, Shield } from "lucide-svelte";
+  import { ShoppingCart, Bell, Package, CheckCircle2, Clock, ChevronRight, MessageSquare, Shield, User } from "lucide-svelte";
   import { cart } from "$lib/stores/cartStore.svelte";
   import { page } from "$app/state";
   import { userSession } from "$lib/session.svelte";
@@ -12,6 +12,7 @@
 
   const routeTitles: Record<string, string> = {
     "/dashboard": "Dashboard",
+    "/profile": "My Profile & Settings",
     "/pharmacy": "Search Pharmacies",
     "/reservations": "My Reservations",
     "/prescriptions": "Prescription Vault",
@@ -172,5 +173,26 @@
         {/if}
       </Button>
     {/if}
+
+    <!-- Profile Navigation Button -->
+    <a
+      href="/profile"
+      class="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full border border-border/60 bg-muted/30 hover:bg-muted/60 transition-colors text-xs font-medium text-foreground ml-1"
+      title="User Profile & Settings"
+    >
+      {#if currentUser?.imageUrl}
+        <img
+          src={currentUser.imageUrl}
+          alt={currentUser.name || "User Avatar"}
+          class="w-6 h-6 rounded-full object-cover border border-primary/30"
+        />
+      {:else}
+        <div class="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[11px]">
+          {(currentUser?.name || "U")[0].toUpperCase()}
+        </div>
+      {/if}
+      <span class="max-w-[100px] truncate hidden sm:inline">{currentUser?.name || "Profile"}</span>
+    </a>
   </div>
 </header>
+
