@@ -4,6 +4,7 @@
   import { ModeWatcher } from "mode-watcher";
   import * as Sidebar from "$lib/components/ui/sidebar";
   import AppSidebar from "$lib/components/app-sidebar.svelte";
+  import AiChatWidget from "$lib/components/AiChatWidget.svelte";
   import { onMount } from 'svelte';
 
   let { data, children } = $props();
@@ -74,8 +75,6 @@
 
 <ModeWatcher />
 
-
-
 {#if !showAppShell}
   <main class="w-screen h-screen relative overflow-hidden">
     {@render children()}
@@ -87,6 +86,7 @@
       <div class="p-6 h-full w-full">
         {@render children()}
       </div>
+      <AiChatWidget />
     </main>
   </Sidebar.Provider>
-{/if}
+{/if}

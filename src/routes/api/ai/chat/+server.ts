@@ -5,7 +5,8 @@ import { convexServer } from "$lib/server/convex";
 import { api } from "../../../../../convex/_generated/api";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "meta-llama/llama-3.3-70b-instruct:free";
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+const DEFAULT_MODEL = "openrouter/auto";
 
 const BASE_SYSTEM_PROMPT = `You are MediVault AI, an expert clinical and pharmaceutical RAG assistant.
 
@@ -50,8 +51,22 @@ export const POST: RequestHandler = async ({ request }) => {
       console.warn("RAG retriever warning:", ragErr);
     }
 
-    const apiKey = (env.OPENROUTER_API_KEY || (globalThis as any).process?.env?.OPENROUTER_API_KEY || "").trim();
-    const model = (env.OPENROUTER_MODEL || (globalThis as any).process?.env?.OPENROUTER_MODEL || DEFAULT_MODEL).trim();
+    const openRouterApiKey = (
+      env.OPENROUTER_API_KEY ||
+      (globalThis as any).process?.env?.OPENROUTER_API_KEY ||
+      ""
+    ).trim();
+    const geminiApiKey = (
+      env.GEMINI_API_KEY ||
+      (globalThis as any).process?.env?.GEMINI_API_KEY ||
+      ""
+    ).trim();
+
+    const model = (
+      env.OPENROUTER_MODEL ||
+      (globalThis as any).process?.env?.OPENROUTER_MODEL ||
+      DEFAULT_MODEL
+    ).trim();
 
     // Step 2: Build RAG-augmented system prompt
     let systemPrompt = BASE_SYSTEM_PROMPT;
@@ -67,103 +82,120 @@ export const POST: RequestHandler = async ({ request }) => {
       .filter((m) => m.role === "user" || m.role === "assistant")
       .slice(-6);
 
-    const apiMessages = [
-      { role: "system", content: systemPrompt },
-      ...recentHistory.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
-      { role: "user", content: message },
-    ];
-
-    // Step 3: Check API Key; use RAG Offline Engine if key is missing
-    if (!apiKey) {
-      const fallback = getRagFallbackResponse(message, ragResult);
-      return json({
-        reply: fallback.reply,
-        suggestedMeds: fallback.suggestedMeds,
-        retrievedCount: ragResult.medicines.length,
-        notice: "OPENROUTER_API_KEY is not set. Operating in Offline Clinical RAG Mode powered by Convex DB.",
-      });
-    }
-
-    // Step 4: Request OpenRouter LLM with RAG-Augmented Context & Model Fallback Chain
-    const candidateModels = Array.from(
-      new Set([
-        model,
-        "openrouter/auto",
-        "google/gemini-2.0-flash-exp:free",
-        "google/gemini-2.5-flash:free",
-        "meta-llama/llama-3.1-8b-instruct:free",
-        "meta-llama/llama-3.3-70b-instruct",
-        "deepseek/deepseek-chat",
-        "mistralai/mistral-7b-instruct",
-      ])
-    );
-
     let rawText = "";
-    let lastStatus = 200;
+    let usedProvider = "";
 
-    for (const modelCandidate of candidateModels) {
-      if (!modelCandidate) continue;
+    // Step 3A: Try Google Gemini Free API if key is present
+    if (geminiApiKey && !rawText) {
       try {
-        const response = await fetch(OPENROUTER_URL, {
+        const geminiPrompt = `${systemPrompt}\n\nUser Query: ${message}`;
+        const res = await fetch(`${GEMINI_URL}?key=${geminiApiKey}`, {
           method: "POST",
-          headers: {
-            "Authorization": `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-            "HTTP-Referer": "https://medivault.com",
-            "X-Title": "MediVault AI Health Assistant",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: modelCandidate,
-            messages: apiMessages,
-            temperature: 0.2,
-            max_tokens: 1000,
+            contents: [
+              {
+                parts: [{ text: geminiPrompt }],
+              },
+            ],
           }),
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          rawText = data.choices?.[0]?.message?.content || "";
-          if (rawText.trim()) {
-            console.log(`Successfully generated response using OpenRouter model '${modelCandidate}'`);
-            break; // Success!
-          }
-        } else {
-          lastStatus = response.status;
-          const errBody = await response.text();
-          console.warn(`OpenRouter model '${modelCandidate}' returned status ${response.status}: ${errBody.slice(0, 200)}`);
+        if (res.ok) {
+          const gData = await res.json();
+          rawText = gData.candidates?.[0]?.content?.parts?.[0]?.text || "";
+          if (rawText) usedProvider = "Google Gemini Free API";
         }
-      } catch (e) {
-        console.warn(`Error fetching candidate model ${modelCandidate}:`, e);
+      } catch (gErr) {
+        console.warn("Gemini API error:", gErr);
       }
     }
 
+    // Step 3B: Try OpenRouter Free Models if OpenRouter key is present or fallback
+    if (openRouterApiKey && !rawText) {
+      const candidateModels = Array.from(
+        new Set([
+          model,
+          "openrouter/auto",
+          "meta-llama/llama-3.3-70b-instruct:free",
+          "google/gemini-2.0-flash-exp:free",
+          "deepseek/deepseek-r1:free",
+          "qwen/qwen-2.5-72b-instruct:free",
+        ])
+      );
+
+      const apiMessages = [
+        { role: "system", content: systemPrompt },
+        ...recentHistory.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        { role: "user", content: message },
+      ];
+
+      for (const modelCandidate of candidateModels) {
+        if (!modelCandidate) continue;
+        try {
+          const response = await fetch(OPENROUTER_URL, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${openRouterApiKey}`,
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://medivault.com",
+              "X-Title": "MediVault AI Health Assistant",
+            },
+            body: JSON.stringify({
+              model: modelCandidate,
+              messages: apiMessages,
+              temperature: 0.2,
+              max_tokens: 1000,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            rawText = data.choices?.[0]?.message?.content || "";
+            if (rawText.trim()) {
+              usedProvider = `OpenRouter (${modelCandidate})`;
+              break;
+            }
+          }
+        } catch (e) {
+          console.warn(`Error fetching candidate model ${modelCandidate}:`, e);
+        }
+      }
+    }
+
+    // Step 4: If no external LLM API was available or successful, use Offline Clinical RAG Engine
     if (!rawText.trim()) {
       const fallback = getRagFallbackResponse(message, ragResult);
       return json({
         reply: fallback.reply,
         suggestedMeds: fallback.suggestedMeds,
         retrievedCount: ragResult.medicines.length,
-        notice: `OpenRouter API status ${lastStatus}. Displaying local clinical RAG response from Convex DB.`,
+        provider: "Offline Convex Clinical RAG Engine",
+        notice: "Operating in Offline Clinical RAG Mode powered by Convex DB catalog.",
       });
     }
 
     const { text, suggestedMeds } = parseSuggestedMedicines(rawText);
 
     // If model didn't format suggestedMeds JSON, populate from RAG top matches
-    const finalMeds = suggestedMeds.length > 0 ? suggestedMeds : ragResult.medicines.map((m) => ({
-      name: m.name,
-      generic: m.genericName,
-      rx: m.requiresPrescription,
-      price: `$${m.unitSellingPrice.toFixed(2)}`,
-    }));
+    const finalMeds =
+      suggestedMeds.length > 0
+        ? suggestedMeds
+        : ragResult.medicines.map((m) => ({
+            name: m.name,
+            generic: m.genericName,
+            rx: m.requiresPrescription,
+            price: `$${m.unitSellingPrice.toFixed(2)}`,
+          }));
 
     return json({
       reply: text,
       suggestedMeds: finalMeds,
       retrievedCount: ragResult.medicines.length,
+      provider: usedProvider,
     });
   } catch (error: any) {
     console.error("AI Chat handler error:", error);
@@ -200,17 +232,33 @@ function parseSuggestedMedicines(rawText: string): {
 /**
  * Offline Clinical RAG Engine generator
  */
-function getRagFallbackResponse(userQuery: string, ragResult: { medicines: any[]; conflictAlerts: string[]; ragContextText: string }) {
+function getRagFallbackResponse(
+  userQuery: string,
+  ragResult: { medicines: any[]; conflictAlerts: string[]; ragContextText: string }
+) {
   if (ragResult.medicines.length > 0) {
     const top = ragResult.medicines[0];
     let reply = `Based on your symptoms, our clinical database retrieved **${top.name}** (${top.genericName}).\n\n`;
     reply += `• **Indicated Symptoms:** ${top.symptoms.join(", ")}\n`;
-    reply += `• **Description:** ${top.description}\n`;
-    reply += `• **Classification:** ${top.requiresPrescription ? "Prescription Medication (Rx Required)" : "Over-The-Counter (OTC)"}\n`;
+    reply += `• **Clinical Description:** ${top.description}\n`;
+    reply += `• **Classification:** ${
+      top.requiresPrescription
+        ? "Prescription Medication (Rx Required)"
+        : "Over-The-Counter (OTC)"
+    }\n`;
     reply += `• **Pharmacy Price:** $${top.unitSellingPrice.toFixed(2)} (In Stock: ${top.stock} units)\n`;
 
+    if (ragResult.medicines.length > 1) {
+      reply += `\n**Other Alternative Medicines Found in Catalog:**\n`;
+      ragResult.medicines.slice(1, 4).forEach((m) => {
+        reply += `- **${m.name}** (${m.genericName}): $${m.unitSellingPrice.toFixed(2)} - ${
+          m.requiresPrescription ? "Rx Required" : "OTC"
+        }\n`;
+      });
+    }
+
     if (ragResult.conflictAlerts.length > 0) {
-      reply += `\n${ragResult.conflictAlerts.join("\n")}`;
+      reply += `\n\n${ragResult.conflictAlerts.join("\n")}`;
     }
 
     reply += `\n\n*Note: Always consult a registered healthcare provider before taking new prescription drugs.*`;
@@ -226,7 +274,9 @@ function getRagFallbackResponse(userQuery: string, ragResult: { medicines: any[]
   }
 
   return {
-    reply: "MediVault Clinical RAG System: Please specify your symptoms (e.g. fever, headache, gastric acidity, cough, pain). We will retrieve matching medicines and drug interaction warnings directly from our pharmacy database.",
+    reply:
+      "MediVault Clinical RAG System: Please specify your symptoms (e.g. fever, headache, gastric acidity, cough, pain, infection). We will retrieve matching medicines and drug interaction warnings directly from our pharmacy database.",
     suggestedMeds: [],
   };
 }
+
