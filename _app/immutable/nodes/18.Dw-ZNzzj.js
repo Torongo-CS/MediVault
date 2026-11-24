@@ -1,0 +1,1 @@
+import{St as e,r as t,xt as n}from"../chunks/c-YBS_dX.js";import{r}from"../chunks/D1RfzlNh.js";import"../chunks/xihTtKlq.js";import"../chunks/3zfdQq842.js";function i(i,a){e(a,!0),t(()=>r(`/notifications`,{replaceState:!0})),n()}export{i as component};

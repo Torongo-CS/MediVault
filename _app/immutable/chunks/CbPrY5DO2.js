@@ -1,0 +1,1 @@
+import"./c-YBS_dX.js";import{t as e}from"./DxNl7J5m2.js";var t=new class{get user(){return e.data.user??null}get role(){return this.user?.role??`customer`}get name(){return this.user?.name??``}get email(){return this.user?.email??``}get isLoggedIn(){return this.user!==null}};export{t};

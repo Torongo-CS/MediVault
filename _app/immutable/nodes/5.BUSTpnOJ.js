@@ -1,0 +1,1 @@
+import{B as e,O as t,Ot as n,R as r,ct as i,ot as a}from"../chunks/c-YBS_dX.js";import"../chunks/xihTtKlq.js";import{t as o}from"../chunks/CjceXXs8.js";var s=e(`<div class="flex flex-col h-full"><!> <div class="flex-1 overflow-y-auto"><!></div></div>`);function c(e,c){var l=s(),u=a(l);o(u,{});var d=i(u,2);t(a(d),()=>c.children),n(d),n(l),r(e,l)}export{c as component};

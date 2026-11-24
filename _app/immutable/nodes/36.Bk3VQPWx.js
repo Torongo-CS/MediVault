@@ -1,0 +1,1 @@
+import{B as e,R as t}from"../chunks/c-YBS_dX.js";import"../chunks/xihTtKlq.js";var n=e(`<h1>About MediVault</h1>`);function r(e){t(e,n())}export{r as component};
